@@ -1,0 +1,1799 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VÉLARO | Tienda virtual de lujo</title>
+  <style>
+    :root {
+      --gold: #d4af37;
+      --gold-soft: #c8a96a;
+      --text: rgba(255,255,255,0.94);
+      --muted: rgba(255,255,255,0.52);
+      --line: rgba(212,175,55,0.15);
+      --card: rgba(255,255,255,0.02);
+      --shadow: 0 24px 60px rgba(0,0,0,0.5);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: Inter, Arial, Helvetica, sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(212,175,55,0.08), transparent 30%),
+        radial-gradient(circle at bottom left, rgba(212,175,55,0.05), transparent 25%),
+        linear-gradient(180deg, #020202 0%, #070707 50%, #020202 100%);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+
+    .container {
+      width: min(1200px, calc(100% - 48px));
+      margin: 0 auto;
+    }
+
+    /* ── NAVBAR ── */
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(2,2,2,0.88);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .nav {
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .logo img { width: 130px; height: auto; }
+
+    .menu {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      font-size: 0.72rem;
+      letter-spacing: 0.28rem;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .menu a { transition: color 0.25s; }
+    .menu a:hover { color: var(--gold); }
+
+    /* ── FILTER BAR ── */
+    .brand-filter-bar {
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,0.6);
+      margin-bottom: 40px;
+    }
+
+    .brand-filter-inner {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      padding: 16px 24px;
+    }
+
+    .filter-btns-wrap {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 1;
+      min-width: 0;
+    }
+
+    .scroll-arrow {
+      flex-shrink: 0;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.45);
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      font-size: 0.85rem;
+      line-height: 1;
+    }
+
+    .scroll-arrow:hover {
+      border-color: rgba(212,175,55,0.4);
+      color: var(--gold);
+    }
+
+    .scroll-arrow:disabled {
+      opacity: 0.2;
+      cursor: default;
+      border-color: rgba(255,255,255,0.05);
+    }
+
+    .filter-btns {
+      display: flex;
+      gap: 8px;
+      flex-shrink: 1;
+      min-width: 0;
+      overflow-x: auto;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+      scroll-behavior: smooth;
+    }
+
+    .filter-btns::-webkit-scrollbar { display: none; }
+
+    .filter-btn {
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.45);
+      font-family: Inter, Arial, sans-serif;
+      font-size: 0.62rem;
+      letter-spacing: 0.28rem;
+      text-transform: uppercase;
+      padding: 10px 20px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.25s ease;
+    }
+
+    .filter-btn:hover {
+      border-color: rgba(212,175,55,0.4);
+      color: var(--gold);
+    }
+
+    .filter-btn.active {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(212,175,55,0.08);
+    }
+
+    .search-wrap {
+      flex-shrink: 0;
+      width: 260px;
+    }
+
+    .search-input {
+      width: 100%;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.8);
+      font-family: Inter, Arial, sans-serif;
+      font-size: 0.62rem;
+      letter-spacing: 0.22rem;
+      text-transform: uppercase;
+      padding: 12px 20px;
+      outline: none;
+      transition: border-color 0.25s;
+    }
+
+    .search-input::placeholder {
+      color: rgba(255,255,255,0.22);
+      letter-spacing: 0.22rem;
+    }
+
+    .search-input:focus {
+      border-color: rgba(212,175,55,0.35);
+    }
+
+    /* ── SCROLL MARGIN ── */
+    #inicio, #perfumes {
+      scroll-margin-top: 80px;
+    }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: calc(100vh - 64px);
+      display: flex;
+      align-items: center;
+      padding: 60px 0;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+    }
+
+    .hero-left {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .eyebrow {
+      font-size: 0.65rem;
+      letter-spacing: 0.5rem;
+      text-transform: uppercase;
+      color: var(--gold-soft);
+    }
+
+    .hero-left h1 {
+      font-size: clamp(2rem, 3.5vw, 3.6rem);
+      line-height: 1.12;
+      font-weight: 200;
+      letter-spacing: 0.12rem;
+      text-transform: uppercase;
+    }
+
+    .hero-left h1 em {
+      font-style: normal;
+      color: var(--gold-soft);
+    }
+
+    .hero-left p {
+      font-size: 0.98rem;
+      line-height: 1.9;
+      color: rgba(255,255,255,0.65);
+      max-width: 520px;
+    }
+
+    .hero-divider {
+      width: 48px;
+      height: 1px;
+      background: var(--gold);
+      opacity: 0.5;
+    }
+
+    .hero-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .tag {
+      padding: 6px 16px;
+      border: 1px solid var(--line);
+      font-size: 0.62rem;
+      letter-spacing: 0.3rem;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: rgba(255,255,255,0.02);
+    }
+
+    /* ── IMAGEN HERO ── */
+    .hero-right { position: relative; }
+
+    .image-frame {
+      position: relative;
+      border: 1px solid var(--line);
+      overflow: hidden;
+      background: #050505;
+      box-shadow: var(--shadow);
+      aspect-ratio: 3 / 4;
+    }
+
+    .image-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.6s ease;
+    }
+
+    .image-frame:hover img { transform: scale(1.03); }
+
+    .image-frame::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 55%, rgba(0,0,0,0.6) 100%);
+      pointer-events: none;
+    }
+
+    .image-label {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      z-index: 5;
+      font-size: 0.58rem;
+      letter-spacing: 0.38rem;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.38);
+    }
+
+    .frame-accent {
+      position: absolute;
+      top: -10px;
+      right: -10px;
+      width: 60px;
+      height: 60px;
+      border-top: 1px solid var(--gold);
+      border-right: 1px solid var(--gold);
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    .frame-accent-b {
+      position: absolute;
+      bottom: -10px;
+      left: -10px;
+      width: 60px;
+      height: 60px;
+      border-bottom: 1px solid var(--gold);
+      border-left: 1px solid var(--gold);
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    /* ── STATS ── */
+    .stats {
+      padding: 56px 0;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .stat-item {
+      text-align: center;
+      padding: 24px;
+      border-right: 1px solid var(--line);
+    }
+
+    .stat-item:last-child { border-right: none; }
+
+    .stat-item strong {
+      display: block;
+      font-size: 2rem;
+      font-weight: 200;
+      color: var(--gold);
+      letter-spacing: 0.1rem;
+      margin-bottom: 8px;
+    }
+
+    .stat-item span {
+      font-size: 0.65rem;
+      letter-spacing: 0.32rem;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    /* ── SECCIÓN PERFUMES ── */
+    .brand-section {
+      padding: 48px 0 100px;
+      border-bottom: 1px solid var(--line);
+      position: relative;
+    }
+
+    .brand-section::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 80% 20%, rgba(212,175,55,0.04), transparent 40%),
+        radial-gradient(circle at 20% 80%, rgba(212,175,55,0.03), transparent 35%);
+      pointer-events: none;
+    }
+
+    /* ── GRID DE PRODUCTOS ── */
+    .products-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    /* ── TARJETA ── */
+    .product-card {
+      background: #111111;
+      border: 1px solid rgba(255,255,255,0.06);
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+      cursor: pointer;
+    }
+
+    .product-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.6), 0 0 0 1px rgba(212,175,55,0.2);
+      border-color: rgba(212,175,55,0.25);
+    }
+
+
+.product-img-wrap {
+  position: relative;
+  background: radial-gradient(ellipse at center, #1c1c1c 0%, #0d0d0d 60%, #070707 100%);
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+    }
+
+    .product-img-wrap img {
+      width: 80%;
+      height: 80%;
+      object-fit: contain;
+      transition: transform 0.5s ease;
+    }
+
+    .product-card:hover .product-img-wrap img {
+      transform: scale(1.07);
+    }
+
+    .product-number {
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      font-size: 0.52rem;
+      letter-spacing: 0.25rem;
+      color: rgba(0,0,0,0.25);
+      font-weight: 500;
+    }
+
+    .product-info {
+      padding: 22px 20px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .product-brand {
+      font-size: 0.58rem;
+      letter-spacing: 0.38rem;
+      text-transform: uppercase;
+      color: var(--gold-soft);
+    }
+
+    .product-name {
+      font-size: 1rem;
+      letter-spacing: 0.14rem;
+      text-transform: uppercase;
+      color: var(--text);
+      font-weight: 300;
+      line-height: 1.3;
+    }
+
+    .product-separator {
+      width: 28px;
+      height: 1px;
+      background: rgba(212,175,55,0.4);
+      margin: 6px 0;
+    }
+
+    .product-btn {
+      margin-top: 20px;
+      display: block;
+      text-align: center;
+      padding: 14px 20px;
+      font-size: 0.6rem;
+      letter-spacing: 0.3rem;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-top: 1px solid rgba(255,255,255,0.06);
+      transition: color 0.25s, background 0.25s;
+    }
+
+    .product-btn:hover {
+      color: var(--gold);
+      background: rgba(212,175,55,0.05);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 32px 0;
+      border-top: 1px solid var(--line);
+    }
+
+    .footer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+      color: rgba(255,255,255,0.28);
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.24rem;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 1024px) {
+      .hero-grid { grid-template-columns: 1fr; gap: 40px; }
+      .hero { padding: 40px 0; min-height: auto; }
+      .image-frame { aspect-ratio: 4 / 3; }
+      .stats-grid { grid-template-columns: 1fr; }
+      .stat-item { border-right: none; border-bottom: 1px solid var(--line); }
+      .stat-item:last-child { border-bottom: none; }
+      .products-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 760px) {
+      .menu { display: none; }
+      .container { width: min(1200px, calc(100% - 28px)); }
+      .products-grid { grid-template-columns: repeat(2, 1fr); }
+      .brand-filter-inner { flex-wrap: wrap; }
+      .search-wrap { width: 100%; }
+    }
+
+    @media (max-width: 480px) {
+      .products-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <header class="topbar">
+    <div class="container nav">
+      <a class="logo" href="#inicio">
+        <img src="Logo.png" alt="VÉLARO" />
+      </a>
+      <nav class="menu">
+        <a href="#inicio">Inicio</a>
+        <a href="#perfumes">Perfumes</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- HERO -->
+    <section class="hero" id="inicio">
+      <div class="container hero-grid">
+        <div class="hero-left">
+          <p class="eyebrow">Moda de lujo · perfumes · zapatos</p>
+          <h1>Una tienda virtual de lujo con <em>identidad propia</em></h1>
+          <div class="hero-divider"></div>
+          <p>
+            VÉLARO es una tienda de perfumes y zapatos que reflejan estilo, elegancia y distinción, cuidadosamente seleccionados para ofrecer calidad a precios accesibles.
+          </p>
+          <div class="hero-tags">
+            <span class="tag">Perfumes</span>
+            <span class="tag">Zapatos</span>
+            <span class="tag">Tienda virtual</span>
+            <span class="tag">Lujo</span>
+          </div>
+        </div>
+        <div class="hero-right">
+          <div class="frame-accent"></div>
+          <div class="frame-accent-b"></div>
+          <div class="image-frame">
+            <img src="Imagen-2.png" alt="Perfume VÉLARO" />
+            <span class="image-label">Luxury Store · VÉLARO</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STATS -->
+    <div class="stats">
+      <div class="container">
+        <div class="stats-grid">
+          <div class="stat-item">
+            <strong>100%</strong>
+            <span>Diseño exclusivo</span>
+          </div>
+          <div class="stat-item">
+            <strong>Lujo</strong>
+            <span>Editorial y premium</span>
+          </div>
+          <div class="stat-item">
+            <strong>∞</strong>
+            <span>Escalable y moderno</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PERFUMES ══ -->
+    <section class="brand-section" id="perfumes">
+      <div class="container">
+
+        <!-- BARRA DE FILTROS Y BÚSQUEDA -->
+        <div class="brand-filter-bar">
+          <div class="brand-filter-inner">
+            <div class="filter-btns-wrap">
+              <button class="scroll-arrow" id="arrow-left" onclick="scrollBrands(-1)" aria-label="Anterior">&#8592;</button>
+              <div class="filter-btns" id="filterBtns">
+                <button onclick="filterBy('all')" id="btn-all" class="filter-btn active">Todos</button>
+                <button onclick="filterBy('RALPH LAUREN')" class="filter-btn">Ralph Lauren</button>
+                <button onclick="filterBy('CALVIN KLEIN')" class="filter-btn">Calvin Klein</button>
+                <button onclick="filterBy('CAROLINA HERRERA')" class="filter-btn">Carolina Herrera</button>
+                <button onclick="filterBy('CREED')" class="filter-btn">Creed</button>
+                <button onclick="filterBy('DIOR')" class="filter-btn">Dior</button>
+                <button onclick="filterBy('HUGO BOSS')" class="filter-btn">Hugo Boss</button>
+                <button onclick="filterBy('FERRARI')" class="filter-btn">Ferrari</button>
+                <button onclick="filterBy('NICHO')" class="filter-btn">Nicho</button>
+              </div>
+              <button class="scroll-arrow" id="arrow-right" onclick="scrollBrands(1)" aria-label="Siguiente">&#8594;</button>
+            </div>
+            <div class="search-wrap">
+              <input type="text" id="searchInput" onkeyup="searchProducts()" placeholder="Buscar producto..." class="search-input" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Grid -->
+        <div class="products-grid">
+
+          <!-- Ralph Lauren -->
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">01</span>
+              <img src="Perfumes/Ralph-Lauren/polo-2-dama.png" alt="Polo 2 Dama" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Ralph Lauren</span>
+              <p class="product-name">Polo 2 Dama</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">02</span>
+              <img src="Perfumes/Ralph-Lauren/polo-2-mini.png" alt="Polo 2 Mini" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Ralph Lauren</span>
+              <p class="product-name">Polo 2 Mini</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">03</span>
+              <img src="Perfumes/Ralph-Lauren/polo-black.png" alt="Polo Black" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Ralph Lauren</span>
+              <p class="product-name">Polo Black</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">04</span>
+              <img src="Perfumes/Ralph-Lauren/polo-blue.png" alt="Polo Blue" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Ralph Lauren</span>
+              <p class="product-name">Polo Blue</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">05</span>
+              <img src="Perfumes/Ralph-Lauren/polo-red-citrica.png" alt="Polo Red Cítrica" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Ralph Lauren</span>
+              <p class="product-name">Polo Red Cítrica</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">06</span>
+              <img src="Perfumes/Ralph-Lauren/ralph.png" alt="Ralph" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Ralph Lauren</span>
+              <p class="product-name">Ralph</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <!-- Calvin Klein -->
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">07</span>
+              <img src="Perfumes/Calvin-Klein/euphoria-men.png" alt="Euphoria Men" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Calvin Klein</span>
+              <p class="product-name">Euphoria Men</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">08</span>
+              <img src="Perfumes/Calvin-Klein/ck-one-unisex.png" alt="CK One Unisex" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Calvin Klein</span>
+              <p class="product-name">CK One Unisex</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">09</span>
+              <img src="Perfumes/Calvin-Klein/euphoria.png" alt="Euphoria" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Calvin Klein</span>
+              <p class="product-name">Euphoria</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">10</span>
+              <img src="Perfumes/Calvin-Klein/one-shock-for-him.png" alt="One Shock For Him" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Calvin Klein</span>
+              <p class="product-name">One Shock For Him</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">11</span>
+              <img src="Perfumes/Calvin-Klein/one-shock-for-her.png" alt="One Shock For Her" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Calvin Klein</span>
+              <p class="product-name">One Shock For Her</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">12</span>
+              <img src="Perfumes/Calvin-Klein/ck-in2u.png" alt="CK IN2U" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Calvin Klein</span>
+              <p class="product-name">CK IN2U</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">13</span>
+              <img src="Perfumes/Calvin-Klein/ck-in2u-for-her.png" alt="CK IN2U for Her" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Calvin Klein</span>
+              <p class="product-name">CK IN2U for Her</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <!-- Carolina Herrera -->
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">14</span>
+              <img src="Perfumes/Carolina-Herrera/ch-women.png" alt="CH Women" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Carolina Herrera</span>
+              <p class="product-name">CH Women</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">15</span>
+              <img src="Perfumes/Carolina-Herrera/good-girl-dot-drama.png" alt="Good Girl Dot Drama" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Carolina Herrera</span>
+              <p class="product-name">Good Girl Dot Drama</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">16</span>
+              <img src="Perfumes/Carolina-Herrera/ch-men.png" alt="CH Men" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Carolina Herrera</span>
+              <p class="product-name">CH Men</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">17</span>
+              <img src="Perfumes/Carolina-Herrera/central-park-men.png" alt="Central Park Men" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Carolina Herrera</span>
+              <p class="product-name">Central Park Men</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">18</span>
+              <img src="Perfumes/Carolina-Herrera/212-vip-wild-party.png" alt="212 VIP Wild Party" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Carolina Herrera</span>
+              <p class="product-name">212 VIP Wild Party</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">19</span>
+              <img src="Perfumes/Carolina-Herrera/212-sexy.png" alt="212 Sexy" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Carolina Herrera</span>
+              <p class="product-name">212 Sexy</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">20</span>
+              <img src="Perfumes/Carolina-Herrera/212-men-aqua.png" alt="212 Men Aqua" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Carolina Herrera</span>
+              <p class="product-name">212 Men Aqua</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">21</span>
+              <img src="Perfumes/Carolina-Herrera/eau-de-parfum-sublime.png" alt="Eau de Parfum Sublime" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Carolina Herrera</span>
+              <p class="product-name">Eau de Parfum Sublime</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">22</span>
+              <img src="Perfumes/Carolina-Herrera/ch-very-good-girl-glam.png" alt="CH Very Good Girl Glam" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Carolina Herrera</span>
+              <p class="product-name">CH Very Good Girl Glam</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">23</span>
+              <img src="Perfumes/Carolina-Herrera/herrera-for-men.png" alt="Herrera For Men" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Carolina Herrera</span>
+              <p class="product-name">Herrera For Men</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">24</span>
+              <img src="Perfumes/Carolina-Herrera/bad-boy.png" alt="Bad Boy" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Carolina Herrera</span>
+              <p class="product-name">Bad Boy</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">25</span>
+              <img src="Perfumes/Carolina-Herrera/ch-men-privee.png" alt="CH Men PrivÃ©e" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Carolina Herrera</span>
+              <p class="product-name">CH Men PrivÃ©e</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">26</span>
+              <img src="Perfumes/Carolina-Herrera/212-sexy-men.png" alt="212 Sexy Men" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Carolina Herrera</span>
+              <p class="product-name">212 Sexy Men</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">27</span>
+              <img src="Perfumes/Carolina-Herrera/212-vip-rose.png" alt="212 VIP RosÃ" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Carolina Herrera</span>
+              <p class="product-name">212 VIP RosÃ</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">28</span>
+              <img src="Perfumes/Carolina-Herrera/good-girl.png" alt="Good Girl" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Carolina Herrera</span>
+              <p class="product-name">Good Girl</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">29</span>
+              <img src="Perfumes/Carolina-Herrera/ch-queens.png" alt="CH Queens" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Carolina Herrera</span>
+              <p class="product-name">CH Queens</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">30</span>
+              <img src="Perfumes/Carolina-Herrera/ch-l-eau.png" alt="CH L'Eau" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Carolina Herrera</span>
+              <p class="product-name">CH L'Eau</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">31</span>
+              <img src="Perfumes/Carolina-Herrera/212-wild-party.png" alt="212 Wild Party" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Carolina Herrera</span>
+              <p class="product-name">212 Wild Party</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">32</span>
+              <img src="Perfumes/Carolina-Herrera/212-vip-men.png" alt="212 VIP Men" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Carolina Herrera</span>
+              <p class="product-name">212 VIP Men</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">33</span>
+              <img src="Perfumes/Carolina-Herrera/212-nyc-men.png" alt="212 NYC Men" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Carolina Herrera</span>
+              <p class="product-name">212 NYC Men</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">34</span>
+              <img src="Perfumes/Carolina-Herrera/good-girl-very.png" alt="Good Girl Very" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Carolina Herrera</span>
+              <p class="product-name">Good Girl Very</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">35</span>
+              <img src="Perfumes/Carolina-Herrera/ch-privee.png" alt="CH PrivÃ©e" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Carolina Herrera</span>
+              <p class="product-name">CH PrivÃ©e</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">36</span>
+              <img src="Perfumes/Carolina-Herrera/central-park.png" alt="Central Park" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Carolina Herrera</span>
+              <p class="product-name">Central Park</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">37</span>
+              <img src="Perfumes/Carolina-Herrera/212-vip.png" alt="212 VIP" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Carolina Herrera</span>
+              <p class="product-name">212 VIP</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">38</span>
+              <img src="Perfumes/Carolina-Herrera/212-vip-black.png" alt="212 VIP Black" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Carolina Herrera</span>
+              <p class="product-name">212 VIP Black</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+
+          <div class="product-card">
+            <div class="product-img-wrap">
+              <span class="product-number">39</span>
+              <img src="Perfumes/Carolina-Herrera/212-men.png" alt="212 MEN" />
+            </div>
+            <div class="product-info">
+              <span class="product-brand">Carolina Herrera</span>
+              <p class="product-name">212 MEN</p>
+              <div class="product-separator"></div>
+            </div>
+            <a class="product-btn">Ver detalles</a>
+          </div>
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">40</span>
+    <img src="Perfumes/Creed/virgin-island-water.png" alt="Virgin Island Water" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Creed</span>
+    <p class="product-name">Virgin Island Water</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">41</span>
+    <img src="Perfumes/Creed/silver.png" alt="Silver" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Creed</span>
+    <p class="product-name">Silver</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">42</span>
+    <img src="Perfumes/Creed/viking.png" alt="Viking" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Creed</span>
+    <p class="product-name">Viking</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">43</span>
+    <img src="Perfumes/Creed/veriver.png" alt="Veriver" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Creed</span>
+    <p class="product-name">Veriver</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">44</span>
+    <img src="Perfumes/Creed/santal.png" alt="Santal" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Creed</span>
+    <p class="product-name">Santal</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">45</span>
+    <img src="Perfumes/Creed/original-aventus-for-her.png" alt="Original Aventus For Her" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Creed</span>
+    <p class="product-name">Original Aventus For Her</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">46</span>
+    <img src="Perfumes/Creed/spring-flower.png" alt="Spring Flower" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Creed</span>
+    <p class="product-name">Spring Flower</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">47</span>
+    <img src="Perfumes/Creed/love-in-black.png" alt="Love In Black" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Creed</span>
+    <p class="product-name">Love In Black</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">48</span>
+    <img src="Perfumes/Creed/love-in-white.png" alt="Love In White" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Creed</span>
+    <p class="product-name">Love In White</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">49</span>
+    <img src="Perfumes/Creed/himalaya.png" alt="Himalaya" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Creed</span>
+    <p class="product-name">Himalaya</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">50</span>
+    <img src="Perfumes/Creed/green-irish-tweed.png" alt="Green Irish Tweed" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Creed</span>
+    <p class="product-name">Green Irish Tweed</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">51</span>
+    <img src="Perfumes/Creed/bois-du-portugal.png" alt="Bois du Portugal" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Creed</span>
+    <p class="product-name">Bois du Portugal</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">52</span>
+    <img src="Perfumes/Creed/aventus.png" alt="Aventus" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Creed</span>
+    <p class="product-name">Aventus</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">53</span>
+    <img src="Perfumes/Creed/aventus-cologne.png" alt="Aventus Cologne" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Creed</span>
+    <p class="product-name">Aventus Cologne</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">54</span>
+    <img src="Perfumes/Creed/millesime-imperial.png" alt="Millesime Imperial" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Creed</span>
+    <p class="product-name">Millesime Imperial</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">55</span>
+    <img src="Perfumes/Creed/wind-flowers-eau-de-parfum.png" alt="Wind Flowers Eau de Parfum" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Creed</span>
+    <p class="product-name">Wind Flowers Eau de Parfum</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">56</span>
+    <img src="Perfumes/Dior/sauvage.png" alt="Sauvage" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Dior</span>
+    <p class="product-name">Sauvage</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">57</span>
+    <img src="Perfumes/Dior/joy.png" alt="Joy" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Dior</span>
+    <p class="product-name">Joy</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">58</span>
+    <img src="Perfumes/Dior/jadore.png" alt="J'Adore" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Dior</span>
+    <p class="product-name">J'Adore</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">59</span>
+    <img src="Perfumes/Dior/hypnotic-poison.png" alt="Hypnotic Poison" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Dior</span>
+    <p class="product-name">Hypnotic Poison</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">60</span>
+    <img src="Perfumes/Dior/homme-intense.png" alt="Homme Intense" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Dior</span>
+    <p class="product-name">Homme Intense</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">61</span>
+    <img src="Perfumes/Dior/fahrenheit.png" alt="Fahrenheit" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Dior</span>
+    <p class="product-name">Fahrenheit</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">62</span>
+    <img src="Perfumes/Dior/addict.png" alt="Addict" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Dior</span>
+    <p class="product-name">Addict</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">63</span>
+    <img src="Perfumes/Dior/sauvage-elixir.png" alt="Sauvage Elixir" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Dior</span>
+    <p class="product-name">Sauvage Elixir</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">64</span>
+    <img src="Perfumes/Dior/miss-dior.png" alt="Miss Dior" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Dior</span>
+    <p class="product-name">Miss Dior</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">65</span>
+    <img src="Perfumes/Dior/midnight-poison.png" alt="Midnight Poison" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Dior</span>
+    <p class="product-name">Midnight Poison</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+          <!-- Hugo Boss -->
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">66</span>
+    <img src="Perfumes/Hugo-Boss/bottle-black.png" alt="Bottle Black" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Hugo Boss</span>
+    <p class="product-name">Bottle Black</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">67</span>
+    <img src="Perfumes/Hugo-Boss/bottled-intense.png" alt="Bottled Intense" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Hugo Boss</span>
+    <p class="product-name">Bottled Intense</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">68</span>
+    <img src="Perfumes/Hugo-Boss/bottled-night.png" alt="Bottled Night" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Hugo Boss</span>
+    <p class="product-name">Bottled Night</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">69</span>
+    <img src="Perfumes/Hugo-Boss/bottled-oud.png" alt="Bottled Oud" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Hugo Boss</span>
+    <p class="product-name">Bottled Oud</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">70</span>
+    <img src="Perfumes/Hugo-Boss/bottled-sport.png" alt="Bottled Sport" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Hugo Boss</span>
+    <p class="product-name">Bottled Sport</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">71</span>
+    <img src="Perfumes/Hugo-Boss/bottled-tonic.png" alt="Bottled Tonic" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Hugo Boss</span>
+    <p class="product-name">Bottled Tonic</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">72</span>
+    <img src="Perfumes/Hugo-Boss/bottled-unlimited.png" alt="Bottled Unlimited" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Hugo Boss</span>
+    <p class="product-name">Bottled Unlimited</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">73</span>
+    <img src="Perfumes/Hugo-Boss/bottled.png" alt="Bottled" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Hugo Boss</span>
+    <p class="product-name">Bottled</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">74</span>
+    <img src="Perfumes/Hugo-Boss/deep-red.png" alt="Deep Red" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Hugo Boss</span>
+    <p class="product-name">Deep Red</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">75</span>
+    <img src="Perfumes/Hugo-Boss/hb-infinite.png" alt="HB Infinite" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Hugo Boss</span>
+    <p class="product-name">HB Infinite</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">76</span>
+    <img src="Perfumes/Hugo-Boss/hugo-man.png" alt="Hugo Man" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Hugo Boss</span>
+    <p class="product-name">Hugo Man</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">77</span>
+    <img src="Perfumes/Hugo-Boss/hugo-red.png" alt="Hugo Red" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Hugo Boss</span>
+    <p class="product-name">Hugo Red</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">78</span>
+    <img src="Perfumes/Hugo-Boss/hugo-reversed.png" alt="Hugo Reversed" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Hugo Boss</span>
+    <p class="product-name">Hugo Reversed</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">79</span>
+    <img src="Perfumes/Hugo-Boss/hugo-woman-eau-de-parfum.png" alt="Hugo Woman Eau de Parfum" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Hugo Boss</span>
+    <p class="product-name">Hugo Woman Eau de Parfum</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">80</span>
+    <img src="Perfumes/Hugo-Boss/in-motion.png" alt="In Motion" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Hugo Boss</span>
+    <p class="product-name">In Motion</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">81</span>
+    <img src="Perfumes/Hugo-Boss/just-different.png" alt="Just Different" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Hugo Boss</span>
+    <p class="product-name">Just Different</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">82</span>
+    <img src="Perfumes/Hugo-Boss/orange-for-men.png" alt="Orange for Men" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Hugo Boss</span>
+    <p class="product-name">Orange for Men</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">83</span>
+    <img src="Perfumes/Hugo-Boss/the-scent-for-her.png" alt="The Scent for Her" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Hugo Boss</span>
+    <p class="product-name">The Scent for Her</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">84</span>
+    <img src="Perfumes/Hugo-Boss/the-scent.png" alt="The Scent" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Hugo Boss</span>
+    <p class="product-name">The Scent</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+<div class="product-card">
+  <div class="product-img-wrap">
+    <span class="product-number">85</span>
+    <img src="Perfumes/Hugo-Boss/xx.png" alt="XX" />
+  </div>
+  <div class="product-info">
+    <span class="product-brand">Hugo Boss</span>
+    <p class="product-name">XX</p>
+    <div class="product-separator"></div>
+  </div>
+  <a class="product-btn">Ver detalles</a>
+</div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container footer-row">
+      <span>© 2026 VÉLARO · Perfumes y zapatos</span>
+      <span>Tienda virtual de lujo</span>
+    </div>
+  </footer>
+
+  <script>
+    function filterBy(brand) {
+      document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+
+      if (brand === 'all') {
+        document.getElementById('btn-all').classList.add('active');
+      } else {
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+          if (btn.textContent.trim().toUpperCase() === brand) {
+            btn.classList.add('active');
+          }
+        });
+      }
+
+      document.querySelectorAll('.product-card').forEach(card => {
+        const cardBrand = card.querySelector('.product-brand')?.textContent.trim().toUpperCase() || '';
+        card.style.display = (brand === 'all' || cardBrand === brand) ? '' : 'none';
+      });
+    }
+
+    function searchProducts() {
+      const query = document.getElementById('searchInput').value.toUpperCase();
+
+      document.querySelectorAll('.product-card').forEach(card => {
+        const name = card.querySelector('.product-name')?.textContent.toUpperCase() || '';
+        const brand = card.querySelector('.product-brand')?.textContent.toUpperCase() || '';
+        card.style.display = (name.includes(query) || brand.includes(query)) ? '' : 'none';
+      });
+    }
+    // ── SCROLL FLECHAS MARCAS ──
+    const filterBtns = document.getElementById('filterBtns');
+    const arrowLeft  = document.getElementById('arrow-left');
+    const arrowRight = document.getElementById('arrow-right');
+
+    function scrollBrands(dir) {
+      filterBtns.scrollLeft += dir * 200;
+    }
+
+    function updateArrows() {
+      arrowLeft.disabled  = filterBtns.scrollLeft <= 0;
+      arrowRight.disabled = filterBtns.scrollLeft >= filterBtns.scrollWidth - filterBtns.clientWidth - 1;
+    }
+
+    filterBtns.addEventListener('scroll', updateArrows);
+    window.addEventListener('resize', updateArrows);
+    updateArrows();
+
+  </script>
+
+</body>
+</html>
