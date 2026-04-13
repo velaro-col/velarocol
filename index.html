@@ -503,27 +503,95 @@
       letter-spacing: 0.24rem;
     }
 
+    /* ── HAMBURGER ── */
+    .hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 6px;
+      z-index: 200;
+    }
+    .hamburger span {
+      display: block;
+      width: 24px;
+      height: 1px;
+      background: rgba(255,255,255,0.7);
+      transition: all 0.3s ease;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      inset: 64px 0 0 0;
+      background: rgba(2,2,2,0.97);
+      backdrop-filter: blur(20px);
+      z-index: 150;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 40px;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a {
+      font-size: 1.1rem;
+      letter-spacing: 0.4rem;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.6);
+      transition: color 0.25s;
+    }
+    .mobile-menu a:hover { color: var(--gold); }
+
     /* ── RESPONSIVE ── */
     @media (max-width: 1024px) {
       .hero-grid { grid-template-columns: 1fr; gap: 40px; }
       .hero { padding: 40px 0; min-height: auto; }
-      .image-frame { aspect-ratio: 4 / 3; }
-      .stats-grid { grid-template-columns: 1fr; }
-      .stat-item { border-right: none; border-bottom: 1px solid var(--line); }
-      .stat-item:last-child { border-bottom: none; }
+      .image-frame { aspect-ratio: 4 / 3; max-width: 500px; margin: 0 auto; }
+      .stats-grid { grid-template-columns: repeat(3, 1fr); }
       .products-grid { grid-template-columns: repeat(2, 1fr); }
     }
 
-    @media (max-width: 760px) {
+    @media (max-width: 768px) {
       .menu { display: none; }
+      .hamburger { display: flex; }
       .container { width: min(1200px, calc(100% - 28px)); }
-      .products-grid { grid-template-columns: repeat(2, 1fr); }
-      .brand-filter-inner { flex-wrap: wrap; }
+      .hero { padding: 32px 0; }
+      .hero-left h1 { font-size: clamp(1.7rem, 6vw, 2.4rem); }
+      .hero-left p { font-size: 0.9rem; }
+      .eyebrow { letter-spacing: 0.3rem; font-size: 0.6rem; }
+      .brand-section { padding: 32px 0 60px; }
+      .brand-filter-inner { flex-wrap: wrap; gap: 12px; padding: 12px 16px; }
+      .filter-btns-wrap { width: 100%; }
       .search-wrap { width: 100%; }
+      .products-grid { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+      .stats-grid { grid-template-columns: 1fr; }
+      .stat-item { border-right: none; border-bottom: 1px solid var(--line); padding: 18px; }
+      .stat-item:last-child { border-bottom: none; }
+      .footer-row { justify-content: center; text-align: center; flex-direction: column; gap: 8px; }
+      .brand-filter-bar { margin-bottom: 24px; }
     }
 
     @media (max-width: 480px) {
+      .products-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .product-info { padding: 14px 12px 0; }
+      .product-name { font-size: 0.82rem; letter-spacing: 0.08rem; }
+      .product-brand { font-size: 0.52rem; letter-spacing: 0.25rem; }
+      .product-btn { padding: 12px; font-size: 0.55rem; letter-spacing: 0.18rem; }
+      .hero-left h1 { font-size: clamp(1.5rem, 7vw, 2rem); }
+      .stat-item strong { font-size: 1.6rem; }
+      .filter-btn { padding: 8px 14px; font-size: 0.58rem; letter-spacing: 0.18rem; }
+      .scroll-arrow { width: 30px; height: 30px; }
+      .logo img { width: 100px; }
+    }
+
+    @media (max-width: 360px) {
       .products-grid { grid-template-columns: 1fr; }
+      .container { width: calc(100% - 20px); }
     }
   </style>
 </head>
@@ -533,14 +601,23 @@
   <header class="topbar">
     <div class="container nav">
       <a class="logo" href="#inicio">
-        <img src="Logo.png" alt="VÉLARO" />
+        <img src="Logo.webp" alt="VÉLARO" />
       </a>
       <nav class="menu">
         <a href="#inicio">Inicio</a>
         <a href="#perfumes">Perfumes</a>
       </nav>
+      <button class="hamburger" id="hamburger" aria-label="Menú" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+      </button>
     </div>
   </header>
+
+  <!-- MENÚ MÓVIL -->
+  <nav class="mobile-menu" id="mobileMenu">
+    <a href="#inicio" onclick="toggleMenu()">Inicio</a>
+    <a href="#perfumes" onclick="toggleMenu()">Perfumes</a>
+  </nav>
 
   <main>
 
@@ -565,7 +642,7 @@
           <div class="frame-accent"></div>
           <div class="frame-accent-b"></div>
           <div class="image-frame">
-            <img src="Imagen-2.png" alt="Perfume VÉLARO" />
+            <img src="Imagen-2.webp" alt="Perfume VÉLARO" />
             <span class="image-label">Luxury Store · VÉLARO</span>
           </div>
         </div>
@@ -627,7 +704,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">01</span>
-              <img src="Perfumes/Ralph-Lauren/polo-2-dama.png" alt="Polo 2 Dama" />
+              <img src="Perfumes/Ralph-Lauren/polo-2-dama.webp" alt="Polo 2 Dama" />
             </div>
             <div class="product-info">
               <span class="product-brand">Ralph Lauren</span>
@@ -640,7 +717,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">02</span>
-              <img src="Perfumes/Ralph-Lauren/polo-2-mini.png" alt="Polo 2 Mini" />
+              <img src="Perfumes/Ralph-Lauren/polo-2-mini.webp" alt="Polo 2 Mini" />
             </div>
             <div class="product-info">
               <span class="product-brand">Ralph Lauren</span>
@@ -653,7 +730,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">03</span>
-              <img src="Perfumes/Ralph-Lauren/polo-black.png" alt="Polo Black" />
+              <img src="Perfumes/Ralph-Lauren/polo-black.webp" alt="Polo Black" />
             </div>
             <div class="product-info">
               <span class="product-brand">Ralph Lauren</span>
@@ -666,7 +743,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">04</span>
-              <img src="Perfumes/Ralph-Lauren/polo-blue.png" alt="Polo Blue" />
+              <img src="Perfumes/Ralph-Lauren/polo-blue.webp" alt="Polo Blue" />
             </div>
             <div class="product-info">
               <span class="product-brand">Ralph Lauren</span>
@@ -679,7 +756,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">05</span>
-              <img src="Perfumes/Ralph-Lauren/polo-red-citrica.png" alt="Polo Red Cítrica" />
+              <img src="Perfumes/Ralph-Lauren/polo-red-citrica.webp" alt="Polo Red Cítrica" />
             </div>
             <div class="product-info">
               <span class="product-brand">Ralph Lauren</span>
@@ -692,7 +769,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">06</span>
-              <img src="Perfumes/Ralph-Lauren/ralph.png" alt="Ralph" />
+              <img src="Perfumes/Ralph-Lauren/ralph.webp" alt="Ralph" />
             </div>
             <div class="product-info">
               <span class="product-brand">Ralph Lauren</span>
@@ -706,7 +783,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">07</span>
-              <img src="Perfumes/Calvin-Klein/euphoria-men.png" alt="Euphoria Men" />
+              <img src="Perfumes/Calvin-Klein/euphoria-men.webp" alt="Euphoria Men" />
             </div>
             <div class="product-info">
               <span class="product-brand">Calvin Klein</span>
@@ -719,7 +796,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">08</span>
-              <img src="Perfumes/Calvin-Klein/ck-one-unisex.png" alt="CK One Unisex" />
+              <img src="Perfumes/Calvin-Klein/ck-one-unisex.webp" alt="CK One Unisex" />
             </div>
             <div class="product-info">
               <span class="product-brand">Calvin Klein</span>
@@ -732,7 +809,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">09</span>
-              <img src="Perfumes/Calvin-Klein/euphoria.png" alt="Euphoria" />
+              <img src="Perfumes/Calvin-Klein/euphoria.webp" alt="Euphoria" />
             </div>
             <div class="product-info">
               <span class="product-brand">Calvin Klein</span>
@@ -745,7 +822,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">10</span>
-              <img src="Perfumes/Calvin-Klein/one-shock-for-him.png" alt="One Shock For Him" />
+              <img src="Perfumes/Calvin-Klein/one-shock-for-him.webp" alt="One Shock For Him" />
             </div>
             <div class="product-info">
               <span class="product-brand">Calvin Klein</span>
@@ -758,7 +835,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">11</span>
-              <img src="Perfumes/Calvin-Klein/one-shock-for-her.png" alt="One Shock For Her" />
+              <img src="Perfumes/Calvin-Klein/one-shock-for-her.webp" alt="One Shock For Her" />
             </div>
             <div class="product-info">
               <span class="product-brand">Calvin Klein</span>
@@ -771,7 +848,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">12</span>
-              <img src="Perfumes/Calvin-Klein/ck-in2u.png" alt="CK IN2U" />
+              <img src="Perfumes/Calvin-Klein/ck-in2u.webp" alt="CK IN2U" />
             </div>
             <div class="product-info">
               <span class="product-brand">Calvin Klein</span>
@@ -784,7 +861,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">13</span>
-              <img src="Perfumes/Calvin-Klein/ck-in2u-for-her.png" alt="CK IN2U for Her" />
+              <img src="Perfumes/Calvin-Klein/ck-in2u-for-her.webp" alt="CK IN2U for Her" />
             </div>
             <div class="product-info">
               <span class="product-brand">Calvin Klein</span>
@@ -798,7 +875,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">14</span>
-              <img src="Perfumes/Carolina-Herrera/ch-women.png" alt="CH Women" />
+              <img src="Perfumes/Carolina-Herrera/ch-women.webp" alt="CH Women" />
             </div>
             <div class="product-info">
               <span class="product-brand">Carolina Herrera</span>
@@ -811,7 +888,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">15</span>
-              <img src="Perfumes/Carolina-Herrera/good-girl-dot-drama.png" alt="Good Girl Dot Drama" />
+              <img src="Perfumes/Carolina-Herrera/good-girl-dot-drama.webp" alt="Good Girl Dot Drama" />
             </div>
             <div class="product-info">
               <span class="product-brand">Carolina Herrera</span>
@@ -824,7 +901,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">16</span>
-              <img src="Perfumes/Carolina-Herrera/ch-men.png" alt="CH Men" />
+              <img src="Perfumes/Carolina-Herrera/ch-men.webp" alt="CH Men" />
             </div>
             <div class="product-info">
               <span class="product-brand">Carolina Herrera</span>
@@ -837,7 +914,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">17</span>
-              <img src="Perfumes/Carolina-Herrera/central-park-men.png" alt="Central Park Men" />
+              <img src="Perfumes/Carolina-Herrera/central-park-men.webp" alt="Central Park Men" />
             </div>
             <div class="product-info">
               <span class="product-brand">Carolina Herrera</span>
@@ -850,7 +927,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">18</span>
-              <img src="Perfumes/Carolina-Herrera/212-vip-wild-party.png" alt="212 VIP Wild Party" />
+              <img src="Perfumes/Carolina-Herrera/212-vip-wild-party.webp" alt="212 VIP Wild Party" />
             </div>
             <div class="product-info">
               <span class="product-brand">Carolina Herrera</span>
@@ -863,7 +940,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">19</span>
-              <img src="Perfumes/Carolina-Herrera/212-sexy.png" alt="212 Sexy" />
+              <img src="Perfumes/Carolina-Herrera/212-sexy.webp" alt="212 Sexy" />
             </div>
             <div class="product-info">
               <span class="product-brand">Carolina Herrera</span>
@@ -876,7 +953,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">20</span>
-              <img src="Perfumes/Carolina-Herrera/212-men-aqua.png" alt="212 Men Aqua" />
+              <img src="Perfumes/Carolina-Herrera/212-men-aqua.webp" alt="212 Men Aqua" />
             </div>
             <div class="product-info">
               <span class="product-brand">Carolina Herrera</span>
@@ -889,7 +966,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">21</span>
-              <img src="Perfumes/Carolina-Herrera/eau-de-parfum-sublime.png" alt="Eau de Parfum Sublime" />
+              <img src="Perfumes/Carolina-Herrera/eau-de-parfum-sublime.webp" alt="Eau de Parfum Sublime" />
             </div>
             <div class="product-info">
               <span class="product-brand">Carolina Herrera</span>
@@ -902,7 +979,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">22</span>
-              <img src="Perfumes/Carolina-Herrera/ch-very-good-girl-glam.png" alt="CH Very Good Girl Glam" />
+              <img src="Perfumes/Carolina-Herrera/ch-very-good-girl-glam.webp" alt="CH Very Good Girl Glam" />
             </div>
             <div class="product-info">
               <span class="product-brand">Carolina Herrera</span>
@@ -915,7 +992,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">23</span>
-              <img src="Perfumes/Carolina-Herrera/herrera-for-men.png" alt="Herrera For Men" />
+              <img src="Perfumes/Carolina-Herrera/herrera-for-men.webp" alt="Herrera For Men" />
             </div>
             <div class="product-info">
               <span class="product-brand">Carolina Herrera</span>
@@ -928,7 +1005,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">24</span>
-              <img src="Perfumes/Carolina-Herrera/bad-boy.png" alt="Bad Boy" />
+              <img src="Perfumes/Carolina-Herrera/bad-boy.webp" alt="Bad Boy" />
             </div>
             <div class="product-info">
               <span class="product-brand">Carolina Herrera</span>
@@ -941,7 +1018,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">25</span>
-              <img src="Perfumes/Carolina-Herrera/ch-men-privee.png" alt="CH Men PrivÃ©e" />
+              <img src="Perfumes/Carolina-Herrera/ch-men-privee.webp" alt="CH Men PrivÃ©e" />
             </div>
             <div class="product-info">
               <span class="product-brand">Carolina Herrera</span>
@@ -954,7 +1031,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">26</span>
-              <img src="Perfumes/Carolina-Herrera/212-sexy-men.png" alt="212 Sexy Men" />
+              <img src="Perfumes/Carolina-Herrera/212-sexy-men.webp" alt="212 Sexy Men" />
             </div>
             <div class="product-info">
               <span class="product-brand">Carolina Herrera</span>
@@ -967,7 +1044,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">27</span>
-              <img src="Perfumes/Carolina-Herrera/212-vip-rose.png" alt="212 VIP RosÃ" />
+              <img src="Perfumes/Carolina-Herrera/212-vip-rose.webp" alt="212 VIP RosÃ" />
             </div>
             <div class="product-info">
               <span class="product-brand">Carolina Herrera</span>
@@ -980,7 +1057,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">28</span>
-              <img src="Perfumes/Carolina-Herrera/good-girl.png" alt="Good Girl" />
+              <img src="Perfumes/Carolina-Herrera/good-girl.webp" alt="Good Girl" />
             </div>
             <div class="product-info">
               <span class="product-brand">Carolina Herrera</span>
@@ -993,7 +1070,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">29</span>
-              <img src="Perfumes/Carolina-Herrera/ch-queens.png" alt="CH Queens" />
+              <img src="Perfumes/Carolina-Herrera/ch-queens.webp" alt="CH Queens" />
             </div>
             <div class="product-info">
               <span class="product-brand">Carolina Herrera</span>
@@ -1006,7 +1083,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">30</span>
-              <img src="Perfumes/Carolina-Herrera/ch-l-eau.png" alt="CH L'Eau" />
+              <img src="Perfumes/Carolina-Herrera/ch-l-eau.webp" alt="CH L'Eau" />
             </div>
             <div class="product-info">
               <span class="product-brand">Carolina Herrera</span>
@@ -1019,7 +1096,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">31</span>
-              <img src="Perfumes/Carolina-Herrera/212-wild-party.png" alt="212 Wild Party" />
+              <img src="Perfumes/Carolina-Herrera/212-wild-party.webp" alt="212 Wild Party" />
             </div>
             <div class="product-info">
               <span class="product-brand">Carolina Herrera</span>
@@ -1032,7 +1109,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">32</span>
-              <img src="Perfumes/Carolina-Herrera/212-vip-men.png" alt="212 VIP Men" />
+              <img src="Perfumes/Carolina-Herrera/212-vip-men.webp" alt="212 VIP Men" />
             </div>
             <div class="product-info">
               <span class="product-brand">Carolina Herrera</span>
@@ -1045,7 +1122,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">33</span>
-              <img src="Perfumes/Carolina-Herrera/212-nyc-men.png" alt="212 NYC Men" />
+              <img src="Perfumes/Carolina-Herrera/212-nyc-men.webp" alt="212 NYC Men" />
             </div>
             <div class="product-info">
               <span class="product-brand">Carolina Herrera</span>
@@ -1058,7 +1135,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">34</span>
-              <img src="Perfumes/Carolina-Herrera/good-girl-very.png" alt="Good Girl Very" />
+              <img src="Perfumes/Carolina-Herrera/good-girl-very.webp" alt="Good Girl Very" />
             </div>
             <div class="product-info">
               <span class="product-brand">Carolina Herrera</span>
@@ -1071,7 +1148,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">35</span>
-              <img src="Perfumes/Carolina-Herrera/ch-privee.png" alt="CH PrivÃ©e" />
+              <img src="Perfumes/Carolina-Herrera/ch-privee.webp" alt="CH PrivÃ©e" />
             </div>
             <div class="product-info">
               <span class="product-brand">Carolina Herrera</span>
@@ -1084,7 +1161,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">36</span>
-              <img src="Perfumes/Carolina-Herrera/central-park.png" alt="Central Park" />
+              <img src="Perfumes/Carolina-Herrera/central-park.webp" alt="Central Park" />
             </div>
             <div class="product-info">
               <span class="product-brand">Carolina Herrera</span>
@@ -1097,7 +1174,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">37</span>
-              <img src="Perfumes/Carolina-Herrera/212-vip.png" alt="212 VIP" />
+              <img src="Perfumes/Carolina-Herrera/212-vip.webp" alt="212 VIP" />
             </div>
             <div class="product-info">
               <span class="product-brand">Carolina Herrera</span>
@@ -1110,7 +1187,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">38</span>
-              <img src="Perfumes/Carolina-Herrera/212-vip-black.png" alt="212 VIP Black" />
+              <img src="Perfumes/Carolina-Herrera/212-vip-black.webp" alt="212 VIP Black" />
             </div>
             <div class="product-info">
               <span class="product-brand">Carolina Herrera</span>
@@ -1123,7 +1200,7 @@
           <div class="product-card">
             <div class="product-img-wrap">
               <span class="product-number">39</span>
-              <img src="Perfumes/Carolina-Herrera/212-men.png" alt="212 MEN" />
+              <img src="Perfumes/Carolina-Herrera/212-men.webp" alt="212 MEN" />
             </div>
             <div class="product-info">
               <span class="product-brand">Carolina Herrera</span>
@@ -1135,7 +1212,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">40</span>
-    <img src="Perfumes/Creed/virgin-island-water.png" alt="Virgin Island Water" />
+    <img src="Perfumes/Creed/virgin-island-water.webp" alt="Virgin Island Water" />
   </div>
   <div class="product-info">
     <span class="product-brand">Creed</span>
@@ -1148,7 +1225,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">41</span>
-    <img src="Perfumes/Creed/silver.png" alt="Silver" />
+    <img src="Perfumes/Creed/silver.webp" alt="Silver" />
   </div>
   <div class="product-info">
     <span class="product-brand">Creed</span>
@@ -1161,7 +1238,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">42</span>
-    <img src="Perfumes/Creed/viking.png" alt="Viking" />
+    <img src="Perfumes/Creed/viking.webp" alt="Viking" />
   </div>
   <div class="product-info">
     <span class="product-brand">Creed</span>
@@ -1174,7 +1251,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">43</span>
-    <img src="Perfumes/Creed/veriver.png" alt="Veriver" />
+    <img src="Perfumes/Creed/veriver.webp" alt="Veriver" />
   </div>
   <div class="product-info">
     <span class="product-brand">Creed</span>
@@ -1187,7 +1264,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">44</span>
-    <img src="Perfumes/Creed/santal.png" alt="Santal" />
+    <img src="Perfumes/Creed/santal.webp" alt="Santal" />
   </div>
   <div class="product-info">
     <span class="product-brand">Creed</span>
@@ -1200,7 +1277,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">45</span>
-    <img src="Perfumes/Creed/original-aventus-for-her.png" alt="Original Aventus For Her" />
+    <img src="Perfumes/Creed/original-aventus-for-her.webp" alt="Original Aventus For Her" />
   </div>
   <div class="product-info">
     <span class="product-brand">Creed</span>
@@ -1213,7 +1290,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">46</span>
-    <img src="Perfumes/Creed/spring-flower.png" alt="Spring Flower" />
+    <img src="Perfumes/Creed/spring-flower.webp" alt="Spring Flower" />
   </div>
   <div class="product-info">
     <span class="product-brand">Creed</span>
@@ -1226,7 +1303,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">47</span>
-    <img src="Perfumes/Creed/love-in-black.png" alt="Love In Black" />
+    <img src="Perfumes/Creed/love-in-black.webp" alt="Love In Black" />
   </div>
   <div class="product-info">
     <span class="product-brand">Creed</span>
@@ -1239,7 +1316,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">48</span>
-    <img src="Perfumes/Creed/love-in-white.png" alt="Love In White" />
+    <img src="Perfumes/Creed/love-in-white.webp" alt="Love In White" />
   </div>
   <div class="product-info">
     <span class="product-brand">Creed</span>
@@ -1252,7 +1329,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">49</span>
-    <img src="Perfumes/Creed/himalaya.png" alt="Himalaya" />
+    <img src="Perfumes/Creed/himalaya.webp" alt="Himalaya" />
   </div>
   <div class="product-info">
     <span class="product-brand">Creed</span>
@@ -1265,7 +1342,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">50</span>
-    <img src="Perfumes/Creed/green-irish-tweed.png" alt="Green Irish Tweed" />
+    <img src="Perfumes/Creed/green-irish-tweed.webp" alt="Green Irish Tweed" />
   </div>
   <div class="product-info">
     <span class="product-brand">Creed</span>
@@ -1278,7 +1355,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">51</span>
-    <img src="Perfumes/Creed/bois-du-portugal.png" alt="Bois du Portugal" />
+    <img src="Perfumes/Creed/bois-du-portugal.webp" alt="Bois du Portugal" />
   </div>
   <div class="product-info">
     <span class="product-brand">Creed</span>
@@ -1291,7 +1368,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">52</span>
-    <img src="Perfumes/Creed/aventus.png" alt="Aventus" />
+    <img src="Perfumes/Creed/aventus.webp" alt="Aventus" />
   </div>
   <div class="product-info">
     <span class="product-brand">Creed</span>
@@ -1304,7 +1381,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">53</span>
-    <img src="Perfumes/Creed/aventus-cologne.png" alt="Aventus Cologne" />
+    <img src="Perfumes/Creed/aventus-cologne.webp" alt="Aventus Cologne" />
   </div>
   <div class="product-info">
     <span class="product-brand">Creed</span>
@@ -1317,7 +1394,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">54</span>
-    <img src="Perfumes/Creed/millesime-imperial.png" alt="Millesime Imperial" />
+    <img src="Perfumes/Creed/millesime-imperial.webp" alt="Millesime Imperial" />
   </div>
   <div class="product-info">
     <span class="product-brand">Creed</span>
@@ -1330,7 +1407,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">55</span>
-    <img src="Perfumes/Creed/wind-flowers-eau-de-parfum.png" alt="Wind Flowers Eau de Parfum" />
+    <img src="Perfumes/Creed/wind-flowers-eau-de-parfum.webp" alt="Wind Flowers Eau de Parfum" />
   </div>
   <div class="product-info">
     <span class="product-brand">Creed</span>
@@ -1343,7 +1420,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">56</span>
-    <img src="Perfumes/Dior/sauvage.png" alt="Sauvage" />
+    <img src="Perfumes/Dior/sauvage.webp" alt="Sauvage" />
   </div>
   <div class="product-info">
     <span class="product-brand">Dior</span>
@@ -1356,7 +1433,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">57</span>
-    <img src="Perfumes/Dior/joy.png" alt="Joy" />
+    <img src="Perfumes/Dior/joy.webp" alt="Joy" />
   </div>
   <div class="product-info">
     <span class="product-brand">Dior</span>
@@ -1369,7 +1446,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">58</span>
-    <img src="Perfumes/Dior/jadore.png" alt="J'Adore" />
+    <img src="Perfumes/Dior/jadore.webp" alt="J'Adore" />
   </div>
   <div class="product-info">
     <span class="product-brand">Dior</span>
@@ -1382,7 +1459,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">59</span>
-    <img src="Perfumes/Dior/hypnotic-poison.png" alt="Hypnotic Poison" />
+    <img src="Perfumes/Dior/hypnotic-poison.webp" alt="Hypnotic Poison" />
   </div>
   <div class="product-info">
     <span class="product-brand">Dior</span>
@@ -1395,7 +1472,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">60</span>
-    <img src="Perfumes/Dior/homme-intense.png" alt="Homme Intense" />
+    <img src="Perfumes/Dior/homme-intense.webp" alt="Homme Intense" />
   </div>
   <div class="product-info">
     <span class="product-brand">Dior</span>
@@ -1408,7 +1485,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">61</span>
-    <img src="Perfumes/Dior/fahrenheit.png" alt="Fahrenheit" />
+    <img src="Perfumes/Dior/fahrenheit.webp" alt="Fahrenheit" />
   </div>
   <div class="product-info">
     <span class="product-brand">Dior</span>
@@ -1421,7 +1498,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">62</span>
-    <img src="Perfumes/Dior/addict.png" alt="Addict" />
+    <img src="Perfumes/Dior/addict.webp" alt="Addict" />
   </div>
   <div class="product-info">
     <span class="product-brand">Dior</span>
@@ -1434,7 +1511,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">63</span>
-    <img src="Perfumes/Dior/sauvage-elixir.png" alt="Sauvage Elixir" />
+    <img src="Perfumes/Dior/sauvage-elixir.webp" alt="Sauvage Elixir" />
   </div>
   <div class="product-info">
     <span class="product-brand">Dior</span>
@@ -1447,7 +1524,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">64</span>
-    <img src="Perfumes/Dior/miss-dior.png" alt="Miss Dior" />
+    <img src="Perfumes/Dior/miss-dior.webp" alt="Miss Dior" />
   </div>
   <div class="product-info">
     <span class="product-brand">Dior</span>
@@ -1460,7 +1537,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">65</span>
-    <img src="Perfumes/Dior/midnight-poison.png" alt="Midnight Poison" />
+    <img src="Perfumes/Dior/midnight-poison.webp" alt="Midnight Poison" />
   </div>
   <div class="product-info">
     <span class="product-brand">Dior</span>
@@ -1475,7 +1552,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">66</span>
-    <img src="Perfumes/Hugo-Boss/bottle-black.png" alt="Bottle Black" />
+    <img src="Perfumes/Hugo-Boss/bottle-black.webp" alt="Bottle Black" />
   </div>
   <div class="product-info">
     <span class="product-brand">Hugo Boss</span>
@@ -1488,7 +1565,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">67</span>
-    <img src="Perfumes/Hugo-Boss/bottled-intense.png" alt="Bottled Intense" />
+    <img src="Perfumes/Hugo-Boss/bottled-intense.webp" alt="Bottled Intense" />
   </div>
   <div class="product-info">
     <span class="product-brand">Hugo Boss</span>
@@ -1501,7 +1578,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">68</span>
-    <img src="Perfumes/Hugo-Boss/bottled-night.png" alt="Bottled Night" />
+    <img src="Perfumes/Hugo-Boss/bottled-night.webp" alt="Bottled Night" />
   </div>
   <div class="product-info">
     <span class="product-brand">Hugo Boss</span>
@@ -1514,7 +1591,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">69</span>
-    <img src="Perfumes/Hugo-Boss/bottled-oud.png" alt="Bottled Oud" />
+    <img src="Perfumes/Hugo-Boss/bottled-oud.webp" alt="Bottled Oud" />
   </div>
   <div class="product-info">
     <span class="product-brand">Hugo Boss</span>
@@ -1527,7 +1604,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">70</span>
-    <img src="Perfumes/Hugo-Boss/bottled-sport.png" alt="Bottled Sport" />
+    <img src="Perfumes/Hugo-Boss/bottled-sport.webp" alt="Bottled Sport" />
   </div>
   <div class="product-info">
     <span class="product-brand">Hugo Boss</span>
@@ -1540,7 +1617,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">71</span>
-    <img src="Perfumes/Hugo-Boss/bottled-tonic.png" alt="Bottled Tonic" />
+    <img src="Perfumes/Hugo-Boss/bottled-tonic.webp" alt="Bottled Tonic" />
   </div>
   <div class="product-info">
     <span class="product-brand">Hugo Boss</span>
@@ -1553,7 +1630,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">72</span>
-    <img src="Perfumes/Hugo-Boss/bottled-unlimited.png" alt="Bottled Unlimited" />
+    <img src="Perfumes/Hugo-Boss/bottled-unlimited.webp" alt="Bottled Unlimited" />
   </div>
   <div class="product-info">
     <span class="product-brand">Hugo Boss</span>
@@ -1566,7 +1643,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">73</span>
-    <img src="Perfumes/Hugo-Boss/bottled.png" alt="Bottled" />
+    <img src="Perfumes/Hugo-Boss/bottled.webp" alt="Bottled" />
   </div>
   <div class="product-info">
     <span class="product-brand">Hugo Boss</span>
@@ -1579,7 +1656,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">74</span>
-    <img src="Perfumes/Hugo-Boss/deep-red.png" alt="Deep Red" />
+    <img src="Perfumes/Hugo-Boss/deep-red.webp" alt="Deep Red" />
   </div>
   <div class="product-info">
     <span class="product-brand">Hugo Boss</span>
@@ -1592,7 +1669,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">75</span>
-    <img src="Perfumes/Hugo-Boss/hb-infinite.png" alt="HB Infinite" />
+    <img src="Perfumes/Hugo-Boss/hb-infinite.webp" alt="HB Infinite" />
   </div>
   <div class="product-info">
     <span class="product-brand">Hugo Boss</span>
@@ -1605,7 +1682,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">76</span>
-    <img src="Perfumes/Hugo-Boss/hugo-man.png" alt="Hugo Man" />
+    <img src="Perfumes/Hugo-Boss/hugo-man.webp" alt="Hugo Man" />
   </div>
   <div class="product-info">
     <span class="product-brand">Hugo Boss</span>
@@ -1618,7 +1695,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">77</span>
-    <img src="Perfumes/Hugo-Boss/hugo-red.png" alt="Hugo Red" />
+    <img src="Perfumes/Hugo-Boss/hugo-red.webp" alt="Hugo Red" />
   </div>
   <div class="product-info">
     <span class="product-brand">Hugo Boss</span>
@@ -1631,7 +1708,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">78</span>
-    <img src="Perfumes/Hugo-Boss/hugo-reversed.png" alt="Hugo Reversed" />
+    <img src="Perfumes/Hugo-Boss/hugo-reversed.webp" alt="Hugo Reversed" />
   </div>
   <div class="product-info">
     <span class="product-brand">Hugo Boss</span>
@@ -1644,7 +1721,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">79</span>
-    <img src="Perfumes/Hugo-Boss/hugo-woman-eau-de-parfum.png" alt="Hugo Woman Eau de Parfum" />
+    <img src="Perfumes/Hugo-Boss/hugo-woman-eau-de-parfum.webp" alt="Hugo Woman Eau de Parfum" />
   </div>
   <div class="product-info">
     <span class="product-brand">Hugo Boss</span>
@@ -1657,7 +1734,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">80</span>
-    <img src="Perfumes/Hugo-Boss/in-motion.png" alt="In Motion" />
+    <img src="Perfumes/Hugo-Boss/in-motion.webp" alt="In Motion" />
   </div>
   <div class="product-info">
     <span class="product-brand">Hugo Boss</span>
@@ -1670,7 +1747,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">81</span>
-    <img src="Perfumes/Hugo-Boss/just-different.png" alt="Just Different" />
+    <img src="Perfumes/Hugo-Boss/just-different.webp" alt="Just Different" />
   </div>
   <div class="product-info">
     <span class="product-brand">Hugo Boss</span>
@@ -1683,7 +1760,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">82</span>
-    <img src="Perfumes/Hugo-Boss/orange-for-men.png" alt="Orange for Men" />
+    <img src="Perfumes/Hugo-Boss/orange-for-men.webp" alt="Orange for Men" />
   </div>
   <div class="product-info">
     <span class="product-brand">Hugo Boss</span>
@@ -1696,7 +1773,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">83</span>
-    <img src="Perfumes/Hugo-Boss/the-scent-for-her.png" alt="The Scent for Her" />
+    <img src="Perfumes/Hugo-Boss/the-scent-for-her.webp" alt="The Scent for Her" />
   </div>
   <div class="product-info">
     <span class="product-brand">Hugo Boss</span>
@@ -1709,7 +1786,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">84</span>
-    <img src="Perfumes/Hugo-Boss/the-scent.png" alt="The Scent" />
+    <img src="Perfumes/Hugo-Boss/the-scent.webp" alt="The Scent" />
   </div>
   <div class="product-info">
     <span class="product-brand">Hugo Boss</span>
@@ -1722,7 +1799,7 @@
 <div class="product-card">
   <div class="product-img-wrap">
     <span class="product-number">85</span>
-    <img src="Perfumes/Hugo-Boss/xx.png" alt="XX" />
+    <img src="Perfumes/Hugo-Boss/xx.webp" alt="XX" />
   </div>
   <div class="product-info">
     <span class="product-brand">Hugo Boss</span>
@@ -1775,6 +1852,15 @@
         card.style.display = (name.includes(query) || brand.includes(query)) ? '' : 'none';
       });
     }
+    // ── MENÚ HAMBURGUESA ──
+    function toggleMenu() {
+      const btn  = document.getElementById('hamburger');
+      const menu = document.getElementById('mobileMenu');
+      btn.classList.toggle('open');
+      menu.classList.toggle('open');
+      document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : '';
+    }
+
     // ── SCROLL FLECHAS MARCAS ──
     const filterBtns = document.getElementById('filterBtns');
     const arrowLeft  = document.getElementById('arrow-left');
