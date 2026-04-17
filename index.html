@@ -412,6 +412,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 }
     }
 
@@ -467,22 +468,44 @@
       margin: 6px 0;
     }
 
-    .product-btn {
-      margin-top: 20px;
-      display: block;
-      text-align: center;
-      padding: 14px 20px;
-      font-size: 0.6rem;
-      letter-spacing: 0.3rem;
-      text-transform: uppercase;
-      color: var(--muted);
-      border-top: 1px solid rgba(255,255,255,0.06);
-      transition: color 0.25s, background 0.25s;
+    /* ── SHOP ── */
+    .shop-section {
+      padding: 100px 0 80px;
+      background: #080808;
+      border-top: 1px solid rgba(212,175,55,0.1);
     }
-
-    .product-btn:hover {
-      color: var(--gold);
-      background: rgba(212,175,55,0.05);
+    .shop-header { text-align: center; margin-bottom: 60px; }
+    .shop-loading, .shop-unconfigured, .shop-error {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      padding: 80px 20px;
+      color: rgba(255,255,255,0.25);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .shop-spinner {
+      width: 32px;
+      height: 32px;
+      border: 2px solid rgba(212,175,55,0.15);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .shop-grid { display: none; }
+    .shop-precio {
+      color: var(--gold) !important;
+      font-size: 0.75rem !important;
+      font-weight: 600 !important;
+      letter-spacing: 0.05em !important;
+    }
+    .shop-no-img {
+      font-size: 2rem;
+      opacity: 0.2;
     }
 
     /* ── FOOTER ── */
@@ -593,6 +616,446 @@
       .products-grid { grid-template-columns: 1fr; }
       .container { width: calc(100% - 20px); }
     }
+
+    /* ══ CARRITO ══ */
+    .product-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      margin-top: 20px;
+    }
+    .product-btn {
+      display: block;
+      text-align: center;
+      padding: 13px 8px;
+      font-size: 0.58rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      transition: color 0.25s, background 0.25s;
+      cursor: pointer;
+      border: none;
+      background: none;
+      font-family: inherit;
+      width: 100%;
+    }
+    .product-btn:hover { color: var(--gold); background: rgba(212,175,55,0.05); }
+    .product-btn-cart {
+      display: block;
+      text-align: center;
+      padding: 13px 8px;
+      font-size: 0.58rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--gold);
+      background: rgba(212,175,55,0.07);
+      border-left: 1px solid rgba(255,255,255,0.06);
+      transition: color 0.25s, background 0.25s;
+      cursor: pointer;
+      border-top: none;
+      border-right: none;
+      border-bottom: none;
+      font-family: inherit;
+      width: 100%;
+    }
+    .product-btn-cart:hover { background: rgba(212,175,55,0.16); color: #fff; }
+    .product-btn-cart.in-cart { color: #7ecb7e; background: rgba(126,203,126,0.08); }
+
+    /* FAB carrito */
+    .cart-fab {
+      position: fixed;
+      bottom: 32px;
+      right: 32px;
+      width: 58px;
+      height: 58px;
+      background: var(--gold);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 900;
+      box-shadow: 0 8px 32px rgba(212,175,55,0.35);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .cart-fab:hover { transform: scale(1.07); box-shadow: 0 12px 40px rgba(212,175,55,0.5); }
+    .cart-fab svg { width: 24px; height: 24px; fill: #0d0d0d; }
+    .cart-fab-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      min-width: 22px;
+      height: 22px;
+      background: #0d0d0d;
+      color: var(--gold);
+      font-size: 0.65rem;
+      font-weight: 700;
+      border-radius: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 5px;
+      border: 1px solid var(--gold);
+      display: none;
+    }
+    .cart-fab-badge.visible { display: flex; }
+
+    /* Drawer carrito */
+    .cart-drawer {
+      position: fixed;
+      top: 0;
+      right: -420px;
+      width: 400px;
+      max-width: 95vw;
+      height: 100vh;
+      background: #0d0d0d;
+      border-left: 1px solid rgba(212,175,55,0.2);
+      z-index: 1100;
+      display: flex;
+      flex-direction: column;
+      transition: right .35s cubic-bezier(.4,0,.2,1);
+      box-shadow: -20px 0 60px rgba(0,0,0,0.6);
+    }
+    .cart-drawer.open { right: 0; }
+    .cart-drawer-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
+      z-index: 1099;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .35s;
+    }
+    .cart-drawer-overlay.open { opacity: 1; pointer-events: all; }
+    .cart-drawer-header {
+      padding: 28px 24px 20px;
+      border-bottom: 1px solid rgba(212,175,55,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .cart-drawer-title {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+    .cart-close-btn {
+      width: 32px;
+      height: 32px;
+      background: rgba(212,175,55,0.08);
+      border: 1px solid rgba(212,175,55,0.2);
+      color: var(--gold-soft);
+      cursor: pointer;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .2s;
+    }
+    .cart-close-btn:hover { background: rgba(212,175,55,0.18); }
+    .cart-items-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 0;
+    }
+    .cart-items-list::-webkit-scrollbar { width: 3px; }
+    .cart-items-list::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.25); border-radius: 2px; }
+    .cart-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: background .2s;
+    }
+    .cart-item:hover { background: rgba(212,175,55,0.03); }
+    .cart-item-img {
+      width: 52px;
+      height: 64px;
+      object-fit: contain;
+      flex-shrink: 0;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+    }
+    .cart-item-info { flex: 1; min-width: 0; }
+    .cart-item-brand {
+      font-size: 0.55rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold-soft);
+      opacity: 0.7;
+    }
+    .cart-item-name {
+      font-size: 0.82rem;
+      color: var(--text);
+      font-weight: 300;
+      margin-top: 2px;
+      line-height: 1.3;
+    }
+    .cart-item-remove {
+      width: 28px;
+      height: 28px;
+      background: none;
+      border: 1px solid rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.3);
+      cursor: pointer;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all .2s;
+    }
+    .cart-item-remove:hover { border-color: rgba(255,80,80,0.4); color: rgba(255,100,100,0.8); }
+    .cart-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 12px;
+      color: rgba(255,255,255,0.2);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .cart-empty svg { width: 48px; height: 48px; opacity: 0.15; }
+    .cart-footer {
+      padding: 20px 24px 28px;
+      border-top: 1px solid rgba(212,175,55,0.12);
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .cart-count-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.12em;
+      color: rgba(255,255,255,0.35);
+      text-transform: uppercase;
+    }
+    .cart-count-label span { color: var(--gold); font-weight: 600; }
+    .cart-whatsapp-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 15px 20px;
+      background: #25D366;
+      border: none;
+      cursor: pointer;
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #fff;
+      font-family: inherit;
+      font-weight: 600;
+      transition: background .2s, transform .15s;
+    }
+    .cart-whatsapp-btn:hover { background: #1ebe5b; transform: translateY(-1px); }
+    .cart-whatsapp-btn:disabled { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.25); cursor: default; transform: none; }
+    .cart-whatsapp-btn svg { width: 18px; height: 18px; fill: currentColor; }
+    .cart-clear-btn {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.25);
+      font-size: 0.55rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      cursor: pointer;
+      font-family: inherit;
+      text-align: center;
+      padding: 4px;
+      transition: color .2s;
+    }
+    .cart-clear-btn:hover { color: rgba(255,100,100,0.6); }
+
+    /* ══ MODAL ══ */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0,0,0,0.88);
+      backdrop-filter: blur(12px);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal-box {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      max-width: 900px;
+      width: 100%;
+      max-height: 90vh;
+      background: #0d0d0d;
+      border: 1px solid rgba(212,175,55,0.25);
+      box-shadow: 0 40px 100px rgba(0,0,0,0.8), 0 0 0 1px rgba(212,175,55,0.1);
+      overflow: hidden;
+      animation: modalIn .3s ease;
+    }
+    @keyframes modalIn {
+      from { opacity:0; transform:scale(.95) translateY(20px); }
+      to   { opacity:1; transform:scale(1)  translateY(0); }
+    }
+
+    .modal-img-side {
+      background: radial-gradient(ellipse at center, #1c1c1c 0%, #0d0d0d 60%, #050505 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 30px;
+      position: relative;
+      border-right: 1px solid rgba(212,175,55,0.12);
+      min-height: 400px;
+    }
+    .modal-img-side::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 30%, rgba(212,175,55,0.06), transparent 65%);
+      pointer-events: none;
+    }
+    .modal-img-side img {
+      max-width: 100%;
+      max-height: 380px;
+      object-fit: contain;
+      transition: transform .5s ease;
+      filter: drop-shadow(0 20px 40px rgba(0,0,0,0.7));
+    }
+    .modal-img-side img:hover { transform: scale(1.04); }
+
+    .modal-info-side {
+      padding: 36px 32px 32px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .modal-info-side::-webkit-scrollbar { width: 3px; }
+    .modal-info-side::-webkit-scrollbar-track { background: transparent; }
+    .modal-info-side::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.3); border-radius: 2px; }
+
+    .modal-brand-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold-soft);
+      font-weight: 400;
+    }
+    .modal-perfume-name {
+      font-size: 1.6rem;
+      font-weight: 300;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      line-height: 1.15;
+      color: var(--text);
+      margin-top: -6px;
+    }
+    .modal-divider {
+      width: 36px;
+      height: 1px;
+      background: var(--gold);
+      opacity: 0.45;
+    }
+    .modal-familia {
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--gold);
+      padding: 5px 13px;
+      border: 1px solid rgba(212,175,55,0.25);
+      display: inline-block;
+      width: fit-content;
+      font-weight: 400;
+    }
+    .modal-notes-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .modal-note-row {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .modal-note-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--gold-soft);
+      opacity: 0.6;
+      font-weight: 500;
+    }
+    .modal-note-value {
+      font-size: 0.85rem;
+      color: rgba(255,255,255,0.8);
+      line-height: 1.55;
+      letter-spacing: 0.01em;
+      font-weight: 300;
+    }
+    .modal-aroma-box {
+      background: rgba(212,175,55,0.04);
+      border-left: 2px solid var(--gold);
+      padding: 12px 16px;
+      gap: 5px;
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-aroma-box .modal-note-value {
+      font-style: italic;
+      color: rgba(255,255,255,0.88);
+      font-size: 0.88rem;
+    }
+    .modal-tags-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .modal-tag {
+      font-size: 0.62rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 5px 13px;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      font-weight: 400;
+    }
+    .modal-close {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      width: 32px;
+      height: 32px;
+      background: rgba(212,175,55,0.08);
+      border: 1px solid rgba(212,175,55,0.2);
+      color: var(--gold-soft);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      z-index: 10;
+      transition: background .2s;
+    }
+    .modal-close:hover { background: rgba(212,175,55,0.18); }
+
+    /* Mobile modal */
+    @media (max-width: 640px) {
+      .modal-box { grid-template-columns: 1fr; max-height: 95vh; }
+      .modal-img-side { min-height: 240px; padding: 24px; border-right: none; border-bottom: 1px solid rgba(212,175,55,0.12); }
+      .modal-img-side img { max-height: 220px; }
+      .modal-info-side { padding: 24px 20px 20px; }
+      .modal-perfume-name { font-size: 1.2rem; }
+    }
+
   </style>
 </head>
 <body>
@@ -606,6 +1069,7 @@
       <nav class="menu">
         <a href="#inicio">Inicio</a>
         <a href="#perfumes">Perfumes</a>
+        <a href="#shop">Shop</a>
       </nav>
       <button class="hamburger" id="hamburger" aria-label="Menú" onclick="toggleMenu()">
         <span></span><span></span><span></span>
@@ -617,6 +1081,7 @@
   <nav class="mobile-menu" id="mobileMenu">
     <a href="#inicio" onclick="toggleMenu()">Inicio</a>
     <a href="#perfumes" onclick="toggleMenu()">Perfumes</a>
+    <a href="#shop" onclick="toggleMenu()">Shop</a>
   </nav>
 
   <main>
@@ -707,7 +1172,7 @@
 
           <!-- Ralph Lauren -->
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">01</span>
               <img src="Perfumes/Ralph-Lauren/polo-2-dama.webp" alt="Polo 2 Dama" />
             </div>
@@ -716,11 +1181,14 @@
               <p class="product-name">Polo 2 Dama</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">02</span>
               <img src="Perfumes/Ralph-Lauren/polo-2-mini.webp" alt="Polo 2 Mini" />
             </div>
@@ -729,11 +1197,14 @@
               <p class="product-name">Polo 2 Mini</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">03</span>
               <img src="Perfumes/Ralph-Lauren/polo-black.webp" alt="Polo Black" />
             </div>
@@ -742,11 +1213,14 @@
               <p class="product-name">Polo Black</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">04</span>
               <img src="Perfumes/Ralph-Lauren/polo-blue.webp" alt="Polo Blue" />
             </div>
@@ -755,11 +1229,14 @@
               <p class="product-name">Polo Blue</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">05</span>
               <img src="Perfumes/Ralph-Lauren/polo-red-citrica.webp" alt="Polo Red Cítrica" />
             </div>
@@ -768,11 +1245,14 @@
               <p class="product-name">Polo Red Cítrica</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">06</span>
               <img src="Perfumes/Ralph-Lauren/ralph.webp" alt="Ralph" />
             </div>
@@ -781,12 +1261,15 @@
               <p class="product-name">Ralph</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <!-- Calvin Klein -->
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">07</span>
               <img src="Perfumes/Calvin-Klein/euphoria-men.webp" alt="Euphoria Men" />
             </div>
@@ -795,11 +1278,14 @@
               <p class="product-name">Euphoria Men</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">08</span>
               <img src="Perfumes/Calvin-Klein/ck-one-unisex.webp" alt="CK One Unisex" />
             </div>
@@ -808,11 +1294,14 @@
               <p class="product-name">CK One Unisex</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">09</span>
               <img src="Perfumes/Calvin-Klein/euphoria.webp" alt="Euphoria" />
             </div>
@@ -821,11 +1310,14 @@
               <p class="product-name">Euphoria</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">10</span>
               <img src="Perfumes/Calvin-Klein/one-shock-for-him.webp" alt="One Shock For Him" />
             </div>
@@ -834,11 +1326,14 @@
               <p class="product-name">One Shock For Him</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">11</span>
               <img src="Perfumes/Calvin-Klein/one-shock-for-her.webp" alt="One Shock For Her" />
             </div>
@@ -847,11 +1342,14 @@
               <p class="product-name">One Shock For Her</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">12</span>
               <img src="Perfumes/Calvin-Klein/ck-in2u.webp" alt="CK IN2U" />
             </div>
@@ -860,11 +1358,14 @@
               <p class="product-name">CK IN2U</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">13</span>
               <img src="Perfumes/Calvin-Klein/ck-in2u-for-her.webp" alt="CK IN2U for Her" />
             </div>
@@ -873,12 +1374,15 @@
               <p class="product-name">CK IN2U for Her</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <!-- Carolina Herrera -->
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">14</span>
               <img src="Perfumes/Carolina-Herrera/ch-women.webp" alt="CH Women" />
             </div>
@@ -887,11 +1391,14 @@
               <p class="product-name">CH Women</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">15</span>
               <img src="Perfumes/Carolina-Herrera/good-girl-dot-drama.webp" alt="Good Girl Dot Drama" />
             </div>
@@ -900,11 +1407,14 @@
               <p class="product-name">Good Girl Dot Drama</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">16</span>
               <img src="Perfumes/Carolina-Herrera/ch-men.webp" alt="CH Men" />
             </div>
@@ -913,11 +1423,14 @@
               <p class="product-name">CH Men</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">17</span>
               <img src="Perfumes/Carolina-Herrera/central-park-men.webp" alt="Central Park Men" />
             </div>
@@ -926,11 +1439,14 @@
               <p class="product-name">Central Park Men</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">18</span>
               <img src="Perfumes/Carolina-Herrera/212-vip-wild-party.webp" alt="212 VIP Wild Party" />
             </div>
@@ -939,11 +1455,14 @@
               <p class="product-name">212 VIP Wild Party</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">19</span>
               <img src="Perfumes/Carolina-Herrera/212-sexy.webp" alt="212 Sexy" />
             </div>
@@ -952,11 +1471,14 @@
               <p class="product-name">212 Sexy</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">20</span>
               <img src="Perfumes/Carolina-Herrera/212-men-aqua.webp" alt="212 Men Aqua" />
             </div>
@@ -965,11 +1487,14 @@
               <p class="product-name">212 Men Aqua</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">21</span>
               <img src="Perfumes/Carolina-Herrera/eau-de-parfum-sublime.webp" alt="Eau de Parfum Sublime" />
             </div>
@@ -978,11 +1503,14 @@
               <p class="product-name">Eau de Parfum Sublime</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">22</span>
               <img src="Perfumes/Carolina-Herrera/ch-very-good-girl-glam.webp" alt="CH Very Good Girl Glam" />
             </div>
@@ -991,11 +1519,14 @@
               <p class="product-name">CH Very Good Girl Glam</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">23</span>
               <img src="Perfumes/Carolina-Herrera/herrera-for-men.webp" alt="Herrera For Men" />
             </div>
@@ -1004,11 +1535,14 @@
               <p class="product-name">Herrera For Men</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">24</span>
               <img src="Perfumes/Carolina-Herrera/bad-boy.webp" alt="Bad Boy" />
             </div>
@@ -1017,11 +1551,14 @@
               <p class="product-name">Bad Boy</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">25</span>
               <img src="Perfumes/Carolina-Herrera/ch-men-privee.webp" alt="CH Men PrivÃ©e" />
             </div>
@@ -1030,11 +1567,14 @@
               <p class="product-name">CH Men PrivÃ©e</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">26</span>
               <img src="Perfumes/Carolina-Herrera/212-sexy-men.webp" alt="212 Sexy Men" />
             </div>
@@ -1043,11 +1583,14 @@
               <p class="product-name">212 Sexy Men</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">27</span>
               <img src="Perfumes/Carolina-Herrera/212-vip-rose.webp" alt="212 VIP RosÃ" />
             </div>
@@ -1056,11 +1599,14 @@
               <p class="product-name">212 VIP RosÃ</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">28</span>
               <img src="Perfumes/Carolina-Herrera/good-girl.webp" alt="Good Girl" />
             </div>
@@ -1069,11 +1615,14 @@
               <p class="product-name">Good Girl</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">29</span>
               <img src="Perfumes/Carolina-Herrera/ch-queens.webp" alt="CH Queens" />
             </div>
@@ -1082,11 +1631,14 @@
               <p class="product-name">CH Queens</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">30</span>
               <img src="Perfumes/Carolina-Herrera/ch-l-eau.webp" alt="CH L'Eau" />
             </div>
@@ -1095,11 +1647,14 @@
               <p class="product-name">CH L'Eau</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">31</span>
               <img src="Perfumes/Carolina-Herrera/212-wild-party.webp" alt="212 Wild Party" />
             </div>
@@ -1108,11 +1663,14 @@
               <p class="product-name">212 Wild Party</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">32</span>
               <img src="Perfumes/Carolina-Herrera/212-vip-men.webp" alt="212 VIP Men" />
             </div>
@@ -1121,11 +1679,14 @@
               <p class="product-name">212 VIP Men</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">33</span>
               <img src="Perfumes/Carolina-Herrera/212-nyc-men.webp" alt="212 NYC Men" />
             </div>
@@ -1134,11 +1695,14 @@
               <p class="product-name">212 NYC Men</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">34</span>
               <img src="Perfumes/Carolina-Herrera/good-girl-very.webp" alt="Good Girl Very" />
             </div>
@@ -1147,11 +1711,14 @@
               <p class="product-name">Good Girl Very</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">35</span>
               <img src="Perfumes/Carolina-Herrera/ch-privee.webp" alt="CH PrivÃ©e" />
             </div>
@@ -1160,11 +1727,14 @@
               <p class="product-name">CH PrivÃ©e</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">36</span>
               <img src="Perfumes/Carolina-Herrera/central-park.webp" alt="Central Park" />
             </div>
@@ -1173,11 +1743,14 @@
               <p class="product-name">Central Park</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">37</span>
               <img src="Perfumes/Carolina-Herrera/212-vip.webp" alt="212 VIP" />
             </div>
@@ -1186,11 +1759,14 @@
               <p class="product-name">212 VIP</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">38</span>
               <img src="Perfumes/Carolina-Herrera/212-vip-black.webp" alt="212 VIP Black" />
             </div>
@@ -1199,11 +1775,14 @@
               <p class="product-name">212 VIP Black</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 
           <div class="product-card">
-            <div class="product-img-wrap">
+            <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
               <span class="product-number">39</span>
               <img src="Perfumes/Carolina-Herrera/212-men.webp" alt="212 MEN" />
             </div>
@@ -1212,10 +1791,13 @@
               <p class="product-name">212 MEN</p>
               <div class="product-separator"></div>
             </div>
-            <a class="product-btn">Ver detalles</a>
+            <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
           </div>
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">40</span>
     <img src="Perfumes/Creed/virgin-island-water.webp" alt="Virgin Island Water" />
   </div>
@@ -1224,11 +1806,14 @@
     <p class="product-name">Virgin Island Water</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">41</span>
     <img src="Perfumes/Creed/silver.webp" alt="Silver" />
   </div>
@@ -1237,11 +1822,14 @@
     <p class="product-name">Silver</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">42</span>
     <img src="Perfumes/Creed/viking.webp" alt="Viking" />
   </div>
@@ -1250,11 +1838,14 @@
     <p class="product-name">Viking</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">43</span>
     <img src="Perfumes/Creed/veriver.webp" alt="Veriver" />
   </div>
@@ -1263,11 +1854,14 @@
     <p class="product-name">Veriver</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">44</span>
     <img src="Perfumes/Creed/santal.webp" alt="Santal" />
   </div>
@@ -1276,11 +1870,14 @@
     <p class="product-name">Santal</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">45</span>
     <img src="Perfumes/Creed/original-aventus-for-her.webp" alt="Original Aventus For Her" />
   </div>
@@ -1289,11 +1886,14 @@
     <p class="product-name">Original Aventus For Her</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">46</span>
     <img src="Perfumes/Creed/spring-flower.webp" alt="Spring Flower" />
   </div>
@@ -1302,11 +1902,14 @@
     <p class="product-name">Spring Flower</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">47</span>
     <img src="Perfumes/Creed/love-in-black.webp" alt="Love In Black" />
   </div>
@@ -1315,11 +1918,14 @@
     <p class="product-name">Love In Black</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">48</span>
     <img src="Perfumes/Creed/love-in-white.webp" alt="Love In White" />
   </div>
@@ -1328,11 +1934,14 @@
     <p class="product-name">Love In White</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">49</span>
     <img src="Perfumes/Creed/himalaya.webp" alt="Himalaya" />
   </div>
@@ -1341,11 +1950,14 @@
     <p class="product-name">Himalaya</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">50</span>
     <img src="Perfumes/Creed/green-irish-tweed.webp" alt="Green Irish Tweed" />
   </div>
@@ -1354,11 +1966,14 @@
     <p class="product-name">Green Irish Tweed</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">51</span>
     <img src="Perfumes/Creed/bois-du-portugal.webp" alt="Bois du Portugal" />
   </div>
@@ -1367,11 +1982,14 @@
     <p class="product-name">Bois du Portugal</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">52</span>
     <img src="Perfumes/Creed/aventus.webp" alt="Aventus" />
   </div>
@@ -1380,11 +1998,14 @@
     <p class="product-name">Aventus</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">53</span>
     <img src="Perfumes/Creed/aventus-cologne.webp" alt="Aventus Cologne" />
   </div>
@@ -1393,11 +2014,14 @@
     <p class="product-name">Aventus Cologne</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">54</span>
     <img src="Perfumes/Creed/millesime-imperial.webp" alt="Millesime Imperial" />
   </div>
@@ -1406,11 +2030,14 @@
     <p class="product-name">Millesime Imperial</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">55</span>
     <img src="Perfumes/Creed/wind-flowers-eau-de-parfum.webp" alt="Wind Flowers Eau de Parfum" />
   </div>
@@ -1419,11 +2046,14 @@
     <p class="product-name">Wind Flowers Eau de Parfum</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">56</span>
     <img src="Perfumes/Dior/sauvage.webp" alt="Sauvage" />
   </div>
@@ -1432,11 +2062,14 @@
     <p class="product-name">Sauvage</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">57</span>
     <img src="Perfumes/Dior/joy.webp" alt="Joy" />
   </div>
@@ -1445,11 +2078,14 @@
     <p class="product-name">Joy</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">58</span>
     <img src="Perfumes/Dior/jadore.webp" alt="J'Adore" />
   </div>
@@ -1458,11 +2094,14 @@
     <p class="product-name">J'Adore</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">59</span>
     <img src="Perfumes/Dior/hypnotic-poison.webp" alt="Hypnotic Poison" />
   </div>
@@ -1471,11 +2110,14 @@
     <p class="product-name">Hypnotic Poison</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">60</span>
     <img src="Perfumes/Dior/homme-intense.webp" alt="Homme Intense" />
   </div>
@@ -1484,11 +2126,14 @@
     <p class="product-name">Homme Intense</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">61</span>
     <img src="Perfumes/Dior/fahrenheit.webp" alt="Fahrenheit" />
   </div>
@@ -1497,11 +2142,14 @@
     <p class="product-name">Fahrenheit</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">62</span>
     <img src="Perfumes/Dior/addict.webp" alt="Addict" />
   </div>
@@ -1510,11 +2158,14 @@
     <p class="product-name">Addict</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">63</span>
     <img src="Perfumes/Dior/sauvage-elixir.webp" alt="Sauvage Elixir" />
   </div>
@@ -1523,11 +2174,14 @@
     <p class="product-name">Sauvage Elixir</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">64</span>
     <img src="Perfumes/Dior/miss-dior.webp" alt="Miss Dior" />
   </div>
@@ -1536,11 +2190,14 @@
     <p class="product-name">Miss Dior</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">65</span>
     <img src="Perfumes/Dior/midnight-poison.webp" alt="Midnight Poison" />
   </div>
@@ -1549,13 +2206,16 @@
     <p class="product-name">Midnight Poison</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
           <!-- Hugo Boss -->
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">66</span>
     <img src="Perfumes/Hugo-Boss/bottle-black.webp" alt="Bottle Black" />
   </div>
@@ -1564,11 +2224,14 @@
     <p class="product-name">Bottle Black</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">67</span>
     <img src="Perfumes/Hugo-Boss/bottled-intense.webp" alt="Bottled Intense" />
   </div>
@@ -1577,11 +2240,14 @@
     <p class="product-name">Bottled Intense</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">68</span>
     <img src="Perfumes/Hugo-Boss/bottled-night.webp" alt="Bottled Night" />
   </div>
@@ -1590,11 +2256,14 @@
     <p class="product-name">Bottled Night</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">69</span>
     <img src="Perfumes/Hugo-Boss/bottled-oud.webp" alt="Bottled Oud" />
   </div>
@@ -1603,11 +2272,14 @@
     <p class="product-name">Bottled Oud</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">70</span>
     <img src="Perfumes/Hugo-Boss/bottled-sport.webp" alt="Bottled Sport" />
   </div>
@@ -1616,11 +2288,14 @@
     <p class="product-name">Bottled Sport</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">71</span>
     <img src="Perfumes/Hugo-Boss/bottled-tonic.webp" alt="Bottled Tonic" />
   </div>
@@ -1629,11 +2304,14 @@
     <p class="product-name">Bottled Tonic</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">72</span>
     <img src="Perfumes/Hugo-Boss/bottled-unlimited.webp" alt="Bottled Unlimited" />
   </div>
@@ -1642,11 +2320,14 @@
     <p class="product-name">Bottled Unlimited</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">73</span>
     <img src="Perfumes/Hugo-Boss/bottled.webp" alt="Bottled" />
   </div>
@@ -1655,11 +2336,14 @@
     <p class="product-name">Bottled</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">74</span>
     <img src="Perfumes/Hugo-Boss/deep-red.webp" alt="Deep Red" />
   </div>
@@ -1668,11 +2352,14 @@
     <p class="product-name">Deep Red</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">75</span>
     <img src="Perfumes/Hugo-Boss/hb-infinite.webp" alt="HB Infinite" />
   </div>
@@ -1681,11 +2368,14 @@
     <p class="product-name">HB Infinite</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">76</span>
     <img src="Perfumes/Hugo-Boss/hugo-man.webp" alt="Hugo Man" />
   </div>
@@ -1694,11 +2384,14 @@
     <p class="product-name">Hugo Man</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">77</span>
     <img src="Perfumes/Hugo-Boss/hugo-red.webp" alt="Hugo Red" />
   </div>
@@ -1707,11 +2400,14 @@
     <p class="product-name">Hugo Red</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">78</span>
     <img src="Perfumes/Hugo-Boss/hugo-reversed.webp" alt="Hugo Reversed" />
   </div>
@@ -1720,11 +2416,14 @@
     <p class="product-name">Hugo Reversed</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">79</span>
     <img src="Perfumes/Hugo-Boss/hugo-woman-eau-de-parfum.webp" alt="Hugo Woman Eau de Parfum" />
   </div>
@@ -1733,11 +2432,14 @@
     <p class="product-name">Hugo Woman Eau de Parfum</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">80</span>
     <img src="Perfumes/Hugo-Boss/in-motion.webp" alt="In Motion" />
   </div>
@@ -1746,11 +2448,14 @@
     <p class="product-name">In Motion</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">81</span>
     <img src="Perfumes/Hugo-Boss/just-different.webp" alt="Just Different" />
   </div>
@@ -1759,11 +2464,14 @@
     <p class="product-name">Just Different</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">82</span>
     <img src="Perfumes/Hugo-Boss/orange-for-men.webp" alt="Orange for Men" />
   </div>
@@ -1772,11 +2480,14 @@
     <p class="product-name">Orange for Men</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">83</span>
     <img src="Perfumes/Hugo-Boss/the-scent-for-her.webp" alt="The Scent for Her" />
   </div>
@@ -1785,11 +2496,14 @@
     <p class="product-name">The Scent for Her</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">84</span>
     <img src="Perfumes/Hugo-Boss/the-scent.webp" alt="The Scent" />
   </div>
@@ -1798,11 +2512,14 @@
     <p class="product-name">The Scent</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">85</span>
     <img src="Perfumes/Hugo-Boss/xx.webp" alt="XX" />
   </div>
@@ -1811,13 +2528,16 @@
     <p class="product-name">XX</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
           <!-- BVLGARI -->
 
 <div class="product-card" data-brand="BVLGARI">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">86</span>
     <img src="Perfumes/Bvlgari/allegra-riva-solare.webp" alt="Allegra Riva Solare" loading="lazy" />
   </div>
@@ -1826,11 +2546,14 @@
     <p class="product-name">Allegra Riva Solare</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="BVLGARI">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">87</span>
     <img src="Perfumes/Bvlgari/amarena.webp" alt="Amarena" loading="lazy" />
   </div>
@@ -1839,11 +2562,14 @@
     <p class="product-name">Amarena</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="BVLGARI">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">88</span>
     <img src="Perfumes/Bvlgari/aqva-amara.webp" alt="Aqva Amara" loading="lazy" />
   </div>
@@ -1852,11 +2578,14 @@
     <p class="product-name">Aqva Amara</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="BVLGARI">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">89</span>
     <img src="Perfumes/Bvlgari/aqva-marine.webp" alt="Aqva Marine" loading="lazy" />
   </div>
@@ -1865,11 +2594,14 @@
     <p class="product-name">Aqva Marine</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="BVLGARI">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">90</span>
     <img src="Perfumes/Bvlgari/blv-pour-homme.webp" alt="BLV Pour Homme" loading="lazy" />
   </div>
@@ -1878,11 +2610,14 @@
     <p class="product-name">BLV Pour Homme</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="BVLGARI">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">91</span>
     <img src="Perfumes/Bvlgari/bvlgari-aqva.webp" alt="Bvlgari Aqva" loading="lazy" />
   </div>
@@ -1891,11 +2626,14 @@
     <p class="product-name">Bvlgari Aqva</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="BVLGARI">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">92</span>
     <img src="Perfumes/Bvlgari/calaluna.webp" alt="Calaluna" loading="lazy" />
   </div>
@@ -1904,11 +2642,14 @@
     <p class="product-name">Calaluna</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="BVLGARI">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">93</span>
     <img src="Perfumes/Bvlgari/man-extreme.webp" alt="Man Extreme" loading="lazy" />
   </div>
@@ -1917,11 +2658,14 @@
     <p class="product-name">Man Extreme</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="BVLGARI">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">94</span>
     <img src="Perfumes/Bvlgari/man-in-black.webp" alt="Man IN Black" loading="lazy" />
   </div>
@@ -1930,11 +2674,14 @@
     <p class="product-name">Man IN Black</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="BVLGARI">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">95</span>
     <img src="Perfumes/Bvlgari/man-wood-essence.webp" alt="Man Wood Essence" loading="lazy" />
   </div>
@@ -1943,11 +2690,14 @@
     <p class="product-name">Man Wood Essence</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="BVLGARI">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">96</span>
     <img src="Perfumes/Bvlgari/noorah.webp" alt="Noorah" loading="lazy" />
   </div>
@@ -1956,11 +2706,14 @@
     <p class="product-name">Noorah</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="BVLGARI">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">97</span>
     <img src="Perfumes/Bvlgari/omnia-amethyste.webp" alt="Omnia Amethyste" loading="lazy" />
   </div>
@@ -1969,11 +2722,14 @@
     <p class="product-name">Omnia Amethyste</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="BVLGARI">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">98</span>
     <img src="Perfumes/Bvlgari/omnia-coral.webp" alt="Omnia Coral" loading="lazy" />
   </div>
@@ -1982,11 +2738,14 @@
     <p class="product-name">Omnia Coral</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="BVLGARI">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">99</span>
     <img src="Perfumes/Bvlgari/omnia-cristalline.webp" alt="Omnia Cristalline" loading="lazy" />
   </div>
@@ -1995,11 +2754,14 @@
     <p class="product-name">Omnia Cristalline</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="BVLGARI">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">100</span>
     <img src="Perfumes/Bvlgari/omnia-pink-sapphire.webp" alt="Omnia Pink Sapphire" loading="lazy" />
   </div>
@@ -2008,11 +2770,14 @@
     <p class="product-name">Omnia Pink Sapphire</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="BVLGARI">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">101</span>
     <img src="Perfumes/Bvlgari/pour-homme-soir.webp" alt="Pour Homme Soir" loading="lazy" />
   </div>
@@ -2021,13 +2786,16 @@
     <p class="product-name">Pour Homme Soir</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
           <!-- LACOSTE -->
 
 <div class="product-card" data-brand="LACOSTE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">102</span>
     <img src="Perfumes/Lacoste/12.12-floral.webp" alt="L.12.12 Floral" loading="lazy" />
   </div>
@@ -2036,11 +2804,14 @@
     <p class="product-name">L.12.12 Floral</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="LACOSTE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">103</span>
     <img src="Perfumes/Lacoste/bleu.webp" alt="Bleu" loading="lazy" />
   </div>
@@ -2049,11 +2820,14 @@
     <p class="product-name">Bleu</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="LACOSTE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">104</span>
     <img src="Perfumes/Lacoste/challenge.webp" alt="Challenge" loading="lazy" />
   </div>
@@ -2062,11 +2836,14 @@
     <p class="product-name">Challenge</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="LACOSTE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">105</span>
     <img src="Perfumes/Lacoste/energized.webp" alt="Energized" loading="lazy" />
   </div>
@@ -2075,11 +2852,14 @@
     <p class="product-name">Energized</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="LACOSTE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">106</span>
     <img src="Perfumes/Lacoste/joy-of-pink.webp" alt="Joy OF Pink" loading="lazy" />
   </div>
@@ -2088,11 +2868,14 @@
     <p class="product-name">Joy OF Pink</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="LACOSTE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">107</span>
     <img src="Perfumes/Lacoste/l.12.12-blanc.webp" alt="L.12.12 Blanc" loading="lazy" />
   </div>
@@ -2101,11 +2884,14 @@
     <p class="product-name">L.12.12 Blanc</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="LACOSTE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">108</span>
     <img src="Perfumes/Lacoste/l.12.12-elegant.webp" alt="L.12.12 Élégant" loading="lazy" />
   </div>
@@ -2114,11 +2900,14 @@
     <p class="product-name">L.12.12 Élégant</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="LACOSTE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">109</span>
     <img src="Perfumes/Lacoste/l.12.12-essential.webp" alt="L.12.12 Essential" loading="lazy" />
   </div>
@@ -2127,11 +2916,14 @@
     <p class="product-name">L.12.12 Essential</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="LACOSTE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">110</span>
     <img src="Perfumes/Lacoste/l.12.12-jane.webp" alt="L.12.12 Jane" loading="lazy" />
   </div>
@@ -2140,11 +2932,14 @@
     <p class="product-name">L.12.12 Jane</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="LACOSTE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">111</span>
     <img src="Perfumes/Lacoste/l.12.12-natural.webp" alt="L.12.12 Natural" loading="lazy" />
   </div>
@@ -2153,11 +2948,14 @@
     <p class="product-name">L.12.12 Natural</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="LACOSTE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">112</span>
     <img src="Perfumes/Lacoste/l.12.12-noir.webp" alt="L.12.12 Noir" loading="lazy" />
   </div>
@@ -2166,11 +2964,14 @@
     <p class="product-name">L.12.12 Noir</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="LACOSTE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">113</span>
     <img src="Perfumes/Lacoste/l.12.12-rouge.webp" alt="L.12.12 Rouge" loading="lazy" />
   </div>
@@ -2179,11 +2980,14 @@
     <p class="product-name">L.12.12 Rouge</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="LACOSTE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">114</span>
     <img src="Perfumes/Lacoste/l.12.12-sparkling.webp" alt="L.12.12 Sparkling" loading="lazy" />
   </div>
@@ -2192,11 +2996,14 @@
     <p class="product-name">L.12.12 Sparkling</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="LACOSTE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">115</span>
     <img src="Perfumes/Lacoste/l.12.12-vert.webp" alt="L.12.12 Vert" loading="lazy" />
   </div>
@@ -2205,11 +3012,14 @@
     <p class="product-name">L.12.12 Vert</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="LACOSTE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">116</span>
     <img src="Perfumes/Lacoste/perfume-l.12.12-fraiche.webp" alt="L.12.12 Fraîche" loading="lazy" />
   </div>
@@ -2218,11 +3028,14 @@
     <p class="product-name">L.12.12 Fraîche</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="LACOSTE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">117</span>
     <img src="Perfumes/Lacoste/red.webp" alt="Red" loading="lazy" />
   </div>
@@ -2231,11 +3044,14 @@
     <p class="product-name">Red</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="LACOSTE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">118</span>
     <img src="Perfumes/Lacoste/sensual.webp" alt="Sensual" loading="lazy" />
   </div>
@@ -2244,11 +3060,14 @@
     <p class="product-name">Sensual</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="LACOSTE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">119</span>
     <img src="Perfumes/Lacoste/touch-of-pink.webp" alt="Touch OF Pink" loading="lazy" />
   </div>
@@ -2257,13 +3076,16 @@
     <p class="product-name">Touch OF Pink</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
           <!-- MARC JACOBS -->
 
 <div class="product-card" data-brand="MARC JACOBS">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">120</span>
     <img src="Perfumes/Marc-Jacobs/daisy-eau-so-fresh.webp" alt="Daisy Eau SO Fresh" loading="lazy" />
   </div>
@@ -2272,11 +3094,14 @@
     <p class="product-name">Daisy Eau SO Fresh</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="MARC JACOBS">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">121</span>
     <img src="Perfumes/Marc-Jacobs/daisy-twinkle.webp" alt="Daisy Twinkle" loading="lazy" />
   </div>
@@ -2285,11 +3110,14 @@
     <p class="product-name">Daisy Twinkle</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="MARC JACOBS">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">122</span>
     <img src="Perfumes/Marc-Jacobs/daisy.webp" alt="Daisy" loading="lazy" />
   </div>
@@ -2298,11 +3126,14 @@
     <p class="product-name">Daisy</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="MARC JACOBS">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">123</span>
     <img src="Perfumes/Marc-Jacobs/decadence-eau-so-decadent.webp" alt="Decadence Eau SO Decadent" loading="lazy" />
   </div>
@@ -2311,11 +3142,14 @@
     <p class="product-name">Decadence Eau SO Decadent</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="MARC JACOBS">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">124</span>
     <img src="Perfumes/Marc-Jacobs/decadence.webp" alt="Decadence" loading="lazy" />
   </div>
@@ -2324,13 +3158,16 @@
     <p class="product-name">Decadence</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
           <!-- PACO RABANNE -->
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">125</span>
     <img src="Perfumes/Paco-Rabanne/1-million-parfum.webp" alt="1 Million Parfum" loading="lazy" />
   </div>
@@ -2339,11 +3176,14 @@
     <p class="product-name">1 Million Parfum</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">126</span>
     <img src="Perfumes/Paco-Rabanne/black-xs-excess.webp" alt="Black XS Excess" loading="lazy" />
   </div>
@@ -2352,11 +3192,14 @@
     <p class="product-name">Black XS Excess</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">127</span>
     <img src="Perfumes/Paco-Rabanne/black-xs-laphrodisiaque.webp" alt="Black XS L'Aphrodisiaque" loading="lazy" />
   </div>
@@ -2365,11 +3208,14 @@
     <p class="product-name">Black XS L'Aphrodisiaque</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">128</span>
     <img src="Perfumes/Paco-Rabanne/black-xs.webp" alt="Black XS" loading="lazy" />
   </div>
@@ -2378,11 +3224,14 @@
     <p class="product-name">Black XS</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">129</span>
     <img src="Perfumes/Paco-Rabanne/fabulous.webp" alt="Fabulous" loading="lazy" />
   </div>
@@ -2391,11 +3240,14 @@
     <p class="product-name">Fabulous</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">130</span>
     <img src="Perfumes/Paco-Rabanne/fame.webp" alt="Fame" loading="lazy" />
   </div>
@@ -2404,11 +3256,14 @@
     <p class="product-name">Fame</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">131</span>
     <img src="Perfumes/Paco-Rabanne/invictus-intense.webp" alt="Invictus Intense" loading="lazy" />
   </div>
@@ -2417,11 +3272,14 @@
     <p class="product-name">Invictus Intense</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">132</span>
     <img src="Perfumes/Paco-Rabanne/invictus-legend.webp" alt="Invictus Legend" loading="lazy" />
   </div>
@@ -2430,11 +3288,14 @@
     <p class="product-name">Invictus Legend</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">133</span>
     <img src="Perfumes/Paco-Rabanne/invictus-parfum.webp" alt="Invictus Parfum" loading="lazy" />
   </div>
@@ -2443,11 +3304,14 @@
     <p class="product-name">Invictus Parfum</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">134</span>
     <img src="Perfumes/Paco-Rabanne/invictus-platium.webp" alt="Invictus Platinum" loading="lazy" />
   </div>
@@ -2456,11 +3320,14 @@
     <p class="product-name">Invictus Platinum</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">135</span>
     <img src="Perfumes/Paco-Rabanne/invictus.webp" alt="Invictus" loading="lazy" />
   </div>
@@ -2469,11 +3336,14 @@
     <p class="product-name">Invictus</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">136</span>
     <img src="Perfumes/Paco-Rabanne/lady-million-empire.webp" alt="Lady Million Empire" loading="lazy" />
   </div>
@@ -2482,11 +3352,14 @@
     <p class="product-name">Lady Million Empire</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">137</span>
     <img src="Perfumes/Paco-Rabanne/lady-million-lucky.webp" alt="Lady Million Lucky" loading="lazy" />
   </div>
@@ -2495,11 +3368,14 @@
     <p class="product-name">Lady Million Lucky</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">138</span>
     <img src="Perfumes/Paco-Rabanne/lady-million-priva.webp" alt="Lady Million Privé" loading="lazy" />
   </div>
@@ -2508,11 +3384,14 @@
     <p class="product-name">Lady Million Privé</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">139</span>
     <img src="Perfumes/Paco-Rabanne/lady-million-royal.webp" alt="Lady Million Royal" loading="lazy" />
   </div>
@@ -2521,11 +3400,14 @@
     <p class="product-name">Lady Million Royal</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">140</span>
     <img src="Perfumes/Paco-Rabanne/lady-million.webp" alt="Lady Million" loading="lazy" />
   </div>
@@ -2534,11 +3416,14 @@
     <p class="product-name">Lady Million</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">141</span>
     <img src="Perfumes/Paco-Rabanne/olympea.webp" alt="Olympea" loading="lazy" />
   </div>
@@ -2547,11 +3432,14 @@
     <p class="product-name">Olympea</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">142</span>
     <img src="Perfumes/Paco-Rabanne/one-million-elixir.webp" alt="One Million Elixir" loading="lazy" />
   </div>
@@ -2560,11 +3448,14 @@
     <p class="product-name">One Million Elixir</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">143</span>
     <img src="Perfumes/Paco-Rabanne/one-million-lucky.webp" alt="One Million Lucky" loading="lazy" />
   </div>
@@ -2573,11 +3464,14 @@
     <p class="product-name">One Million Lucky</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">144</span>
     <img src="Perfumes/Paco-Rabanne/one-million-priva.webp" alt="One Million Privé" loading="lazy" />
   </div>
@@ -2586,11 +3480,14 @@
     <p class="product-name">One Million Privé</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">145</span>
     <img src="Perfumes/Paco-Rabanne/one-million-royal.webp" alt="One Million Royal" loading="lazy" />
   </div>
@@ -2599,11 +3496,14 @@
     <p class="product-name">One Million Royal</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">146</span>
     <img src="Perfumes/Paco-Rabanne/one-million.webp" alt="One Million" loading="lazy" />
   </div>
@@ -2612,11 +3512,14 @@
     <p class="product-name">One Million</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">147</span>
     <img src="Perfumes/Paco-Rabanne/onix-inv.webp" alt="Onix Invictus" loading="lazy" />
   </div>
@@ -2625,11 +3528,14 @@
     <p class="product-name">Onix Invictus</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">148</span>
     <img src="Perfumes/Paco-Rabanne/perfume-black-xs-lexces-for-her.webp" alt="Black XS L'Exces For Her" loading="lazy" />
   </div>
@@ -2638,11 +3544,14 @@
     <p class="product-name">Black XS L'Exces For Her</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">149</span>
     <img src="Perfumes/Paco-Rabanne/perfume-invictus-victory-elixir.webp" alt="Invictus Victory Elixir" loading="lazy" />
   </div>
@@ -2651,11 +3560,14 @@
     <p class="product-name">Invictus Victory Elixir</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">150</span>
     <img src="Perfumes/Paco-Rabanne/phantom-legion.webp" alt="Phantom Legion" loading="lazy" />
   </div>
@@ -2664,11 +3576,14 @@
     <p class="product-name">Phantom Legion</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">151</span>
     <img src="Perfumes/Paco-Rabanne/phantom-negra.webp" alt="Phantom Negra" loading="lazy" />
   </div>
@@ -2677,11 +3592,14 @@
     <p class="product-name">Phantom Negra</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">152</span>
     <img src="Perfumes/Paco-Rabanne/phantom.webp" alt="Phantom" loading="lazy" />
   </div>
@@ -2690,11 +3608,14 @@
     <p class="product-name">Phantom</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">153</span>
     <img src="Perfumes/Paco-Rabanne/pure-xs.webp" alt="Pure XS" loading="lazy" />
   </div>
@@ -2703,11 +3624,14 @@
     <p class="product-name">Pure XS</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
 <div class="product-card" data-brand="PACO RABANNE">
-  <div class="product-img-wrap">
+  <div class="product-img-wrap" onclick="openModal(this)" style="cursor:pointer">
     <span class="product-number">154</span>
     <img src="Perfumes/Paco-Rabanne/victory.webp" alt="Victory" loading="lazy" />
   </div>
@@ -2716,7 +3640,10 @@
     <p class="product-name">Victory</p>
     <div class="product-separator"></div>
   </div>
-  <a class="product-btn">Ver detalles</a>
+  <div class="product-actions">
+            <button class="product-btn" onclick="openModal(this)">Ver detalles</button>
+            <button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>
+          </div>
 </div>
 
         </div>
@@ -2724,6 +3651,36 @@
     </section>
 
   </main>
+
+  <!-- ══ SHOP ══ -->
+  <section id="shop" class="shop-section">
+    <div class="container">
+      <div class="shop-header">
+        <p class="section-subtitle">Disponibilidad inmediata</p>
+        <h2 class="section-title">S H O P</h2>
+        <div class="section-line"></div>
+      </div>
+
+      <!-- Estado: cargando -->
+      <div class="shop-loading" id="shopLoading">
+        <div class="shop-spinner"></div>
+        <p>Cargando productos...</p>
+      </div>
+
+      <!-- Estado: sin configurar -->
+      <div class="shop-unconfigured" id="shopUnconfigured" style="display:none">
+        <p>Conecta tu Google Sheet para mostrar productos aquí.</p>
+      </div>
+
+      <!-- Estado: error -->
+      <div class="shop-error" id="shopError" style="display:none">
+        <p id="shopErrorMsg">No se pudo cargar el catálogo.</p>
+      </div>
+
+      <!-- Grid de productos -->
+      <div class="products-grid shop-grid" id="shopGrid" style="display:none"></div>
+    </div>
+  </section>
 
   <!-- FOOTER -->
   <footer>
@@ -2789,7 +3746,501 @@
     window.addEventListener('resize', updateArrows);
     updateArrows();
 
+    // ══ DATOS DE PERFUMES ══
+    const perfumeData = {
+      "Polo 2 Dama":{"familia":"Floral Frutal","salida":"Arándano, mousse de tonka","corazon":"Frambuesa, peonía","fondo":"Ámbar, almizcle","aroma":"Frutal dulce con toques coquetos y femeninos","duracion":"4-6 horas","ocasion":"Uso diario · Primavera-Verano"},
+      "Polo 2 Mini":{"familia":"Floral Frutal","salida":"Arándano, mousse de tonka","corazon":"Frambuesa, peonía","fondo":"Ámbar, almizcle","aroma":"Frutal dulce con toques coquetos y femeninos","duracion":"4-6 horas","ocasion":"Uso diario · Primavera-Verano"},
+      "Polo Black":{"familia":"Aromático Leñoso","salida":"Mango helado, mandarina, limón, cardamomo","corazon":"Acorde ozónico, jazmín, armoise plateada","fondo":"Musgo, tonka, pachulí negro, cedro","aroma":"Energía crujiente y sensualidad oscura","duracion":"4-7 horas","ocasion":"Noche · Todo el año"},
+      "Polo Blue":{"familia":"Acuático Fresco","salida":"Bergamota, melón, pepino, acorde acuático","corazon":"Salvia, geranio, verbena, albahaca","fondo":"Pachulí, almizcle suave, notas de ante","aroma":"Fresco acuático y marino, limpio y moderno","duracion":"4-6 horas","ocasion":"Casual · Verano"},
+      "Polo Red Cítrica":{"familia":"Especiado Oriental","salida":"Pomelo, arándano rojo, limón","corazon":"Lavanda, azafrán, salvia","fondo":"Café, cedro, vainilla, almizcle","aroma":"Cálido, especiado y sofisticado con frescura inicial","duracion":"4-10 horas","ocasion":"Noche · Invierno"},
+      "Ralph":{"familia":"Floral Fresco","salida":"Manzana, mandarina italiana, osmanto japonés","corazon":"Fresia amarilla, magnolia, boronia","fondo":"Iris blanco, almizcle","aroma":"Floral fresco y optimista, lleno de energía","duracion":"3-5 horas","ocasion":"Uso diario · Primavera"},
+      "Euphoria Men":{"familia":"Aromático Leñoso","salida":"Jengibre, pimienta","corazon":"Albahaca negra, salvia, cedro","fondo":"Ámbar, gamuza, madera roja brasileña, pachulí","aroma":"Refinado y masculino con carácter oscuro y seductor","duracion":"6-8 horas","ocasion":"Uso diario · Noche"},
+      "CK One Unisex":{"familia":"Cítrico Aromático","salida":"Piña, mandarina, papaya, bergamota, cardamomo","corazon":"Violeta, iris, jazmín, lirio, rosa","fondo":"Sándalo, ámbar, almizcle, cedro","aroma":"Fresco, limpio y cítrico, ícono unisex atemporal","duracion":"4-6 horas","ocasion":"Unisex · Verano · Versátil"},
+      "Euphoria":{"familia":"Floral Oriental","salida":"Granada, caqui","corazon":"Orquídea negra, loto, champaca","fondo":"Caoba, ámbar dorado, violeta negra, nata","aroma":"Exótico, sensual y cremoso con misterio profundo","duracion":"5-8 horas","ocasion":"Noche · Eventos especiales"},
+      "One Shock For Him":{"familia":"Oriental Especiado","salida":"Lavanda, clementina, pepino","corazon":"Cardamomo, pimienta, albahaca, osmanto","fondo":"Tabaco, ámbar, pachulí, almizcle","aroma":"Cálido, especiado y sofisticado con provocación","duracion":"5-8 horas","ocasion":"Noche · Otoño-Invierno"},
+      "One Shock For Her":{"familia":"Oriental Floral","salida":"Flor de pasión, amapola roja, peonía","corazon":"Mora, chocolate mexicano, narciso, jazmín","fondo":"Vainilla, almizcle, ámbar, pachulí","aroma":"Opulento, floral y dulce con sensualidad oscura","duracion":"4-8 horas","ocasion":"Noche · Otoño-Invierno"},
+      "CK IN2U":{"familia":"Aromático Fougère","salida":"Limón, hoja de tomate","corazon":"Vaina de cacao","fondo":"Cedro, almizcle blanco, vetiver","aroma":"Fresco cítrico y distintivo, joven y urbano","duracion":"4-6 horas","ocasion":"Casual · Primavera-Verano"},
+      "CK IN2U for Her":{"familia":"Floral Oriental","salida":"Pomelo rosa, bergamota siciliana, hoja de grosella","corazon":"Cactus, orquídea","fondo":"Vainilla, cedro rojo, ámbar","aroma":"Fresco, luminoso y floral con calidez oriental","duracion":"5-6 horas","ocasion":"Casual · Verano"},
+      "CH Women":{"familia":"Floral Oriental","salida":"Bergamota, naranja, toronja, melón","corazon":"Rosa búlgara, jazmín, praline, canela","fondo":"Sándalo, cedro, pachulí, almizcle","aroma":"Sofisticada, exótica y sensual con notas tropicales","duracion":"Larga duración","ocasion":"Noche · Ocasiones especiales"},
+      "Good Girl Dot Drama":{"familia":"Oriental Floral","salida":"Almendra, bergamota, limón, café","corazon":"Tuberosa, flor de naranja, rosa, jazmín","fondo":"Haba tonka, cachemira, vainilla, praline, cacao","aroma":"Oriental seductor y cautivador con dualidad dulce-oscura","duracion":"Larga duración","ocasion":"Noche · Ocasiones especiales"},
+      "CH Men":{"familia":"Oriental Picante","salida":"Hierba, bergamota, pomelo","corazon":"Nuez moscada, violeta, azafrán, jazmín","fondo":"Azúcar, cuero, vainilla, gamuza, ámbar, sándalo","aroma":"Sofisticado, amaderado con cuero y aventura","duracion":"Moderada a larga","ocasion":"Noche · Versátil"},
+      "Central Park Men":{"familia":"Amaderada Picante","salida":"Jengibre, toronja, pimienta rosa y negra","corazon":"Cardamomo negro, violeta, té negro","fondo":"Cedro, vetiver","aroma":"Woody y especiado con acorde de jengibre fresco","duracion":"3-5 horas","ocasion":"Diaria · Primavera-Verano"},
+      "212 VIP Wild Party":{"familia":"Floral Frutal","salida":"Toronja, piña","corazon":"Flor de naranja, rosa del sol, orquídea","fondo":"Notas amaderadas, almizcle","aroma":"Cóctel dorado y exótico, festivo e irresistible","duracion":"Moderada","ocasion":"Fiesta · Noche"},
+      "212 Sexy":{"familia":"Floral Ámbar","salida":"Pimienta rosa, naranja mandarina, bergamota","corazon":"Algodón de azúcar, gardenia, geranio, rosa","fondo":"Vainilla, almizcle, sándalo, caramelo, pachulí","aroma":"Seductora e irresistible, brillante y cálida","duracion":"Moderada a larga","ocasion":"Diaria · Noche"},
+      "212 Men Aqua":{"familia":"Amaderada Acuática","salida":"Toronja, bergamota, jengibre, agua de mar","corazon":"Cardamomo, gardenia, cipriol, ambroxan","fondo":"Pachulí, sándalo, vetiver, almizcle","aroma":"Sofisticado y masculino con frescura acuática","duracion":"Moderada","ocasion":"Diaria · Todo el año"},
+      "Eau de Parfum Sublime":{"familia":"Floral","salida":"Flor de pasión, bergamota","corazon":"Orquídea, rosa","fondo":"Pachulí, cuero, ámbar, musgo","aroma":"Elegante y sensual inspirada en los años 20","duracion":"Larga duración","ocasion":"Noche · Ocasiones especiales"},
+      "CH Very Good Girl Glam":{"familia":"Frutal Floral","salida":"Cereza ácida, almendra amarga","corazon":"Rosa, lirio","fondo":"Vainilla bourbon, vetiver","aroma":"Cherry-forward con florales y vainilla cálida","duracion":"Moderada a larga","ocasion":"Diaria · Ocasiones especiales"},
+      "Herrera For Men":{"familia":"Musk Floral Amaderado","salida":"Limón, lavanda, romero, neroli","corazon":"Tabaco, sándalo, geranio, clavo","fondo":"Tabaco, sándalo, ámbar gris","aroma":"Expansivo y sofisticado con nota vibrante de neroli","duracion":"Larga duración","ocasion":"Noche · Todo el año"},
+      "Bad Boy":{"familia":"Amaderada Especiada","salida":"Pimienta blanca, pimienta negra, bergamota","corazon":"Salvia, cedro","fondo":"Haba tonka, cacao, amberwood","aroma":"Dulce, seductor, magnético y provocativo","duracion":"Larga duración","ocasion":"Noche · Ocasiones especiales"},
+      "CH Men PrivÃ©e":{"familia":"Cuero Amaderado","salida":"Whiskey, toronja, pomelo","corazon":"Cardamomo, lavanda, salvia, tomillo rojo","fondo":"Cuero, haba tonka, notas amaderadas, benzoína","aroma":"Sofisticado y complejo con acento de whiskey","duracion":"Larga duración","ocasion":"Noche · Uso sofisticado"},
+      "212 Sexy Men":{"familia":"Ámbar Fougère","salida":"Naranja mandarina, bergamota, notas verdes","corazon":"Pimienta, flores, cardamomo","fondo":"Vainilla, madera guayaco, sándalo, almizcle, ámbar","aroma":"Sensual y magnetizante, misterioso y sofisticado","duracion":"6-8 horas","ocasion":"Noche · Todo el año"},
+      "212 VIP RosÃ":{"familia":"Floral Frutal","salida":"Champagne rosé, pimienta rosa","corazon":"Flor de durazno, ramo de rosas","fondo":"Queenwood, almizcle","aroma":"Brillante y fresco con contrastes florales y frutales","duracion":"Moderada a larga","ocasion":"Celebraciones · Primavera"},
+      "Good Girl":{"familia":"Oriental Floral","salida":"Almendra, café, bergamota, limón","corazon":"Tuberosa, jazmín sambac, flor de naranja, rosa búlgara","fondo":"Haba tonka, cacao, vainilla, praline, sándalo, pachulí","aroma":"Oriental sexy, dualidad dulce-oscura, adictivo","duracion":"Larga duración","ocasion":"Noche · Todo el año"},
+      "CH Queens":{"familia":"Floral Tropical","salida":"Toronja rosada, algas marinas, neroli","corazon":"Coco, ylang-ylang, peonía","fondo":"Vainilla, sándalo","aroma":"Lúdico y seductor, alegre y aventurero","duracion":"Moderada a larga","ocasion":"Diaria · Primavera-Verano"},
+      "CH L'Eau":{"familia":"Floral Fresco","salida":"Limón, naranja sanguina, neroli, cardamomo","corazon":"Té, jengibre, mate, flor de naranja, rosa","fondo":"Cedro atlas, vetiver, almizcle, pachulí","aroma":"Especiado y cítrico, fresco y sofisticado","duracion":"Moderada","ocasion":"Diaria · Primavera-Verano"},
+      "212 Wild Party":{"familia":"Floral Frutal","salida":"Toronja, piña","corazon":"Flor de naranja, orquídea","fondo":"Almizcle","aroma":"Cóctel exótico y fresco, festivo y efervescente","duracion":"Moderada","ocasion":"Fiesta · Noche"},
+      "212 VIP Men":{"familia":"Oriental Amaderado","salida":"Fruta de la pasión, lima, pimienta, jengibre","corazon":"Vodka, ginebra, menta, especias","fondo":"Ámbar, cuero, notas amaderadas","aroma":"Fresco y afrutado al inicio, cálido y especiado al final","duracion":"Larga duración","ocasion":"Noche · Todo el año"},
+      "212 NYC Men":{"familia":"Amaderada Aromática","salida":"Notas verdes, toronja, bergamota, lavanda","corazon":"Jengibre, violeta, gardenia, salvia","fondo":"Almizcle, sándalo, incienso, vetiver, labdanum","aroma":"Fresco, energético y sofisticado","duracion":"Moderada a larga","ocasion":"Diaria · Todo el año"},
+      "Good Girl Very":{"familia":"Frutal Floral","salida":"Grosella roja, lichi","corazon":"Rosa","fondo":"Vainilla, vetiver","aroma":"Afrutado fresco con toque floral romántico","duracion":"Moderada","ocasion":"Diaria · Primavera-Verano"},
+      "CH PrivÃ©e":{"familia":"Cuero","salida":"Notas frutales","corazon":"Osmanto, notas florales","fondo":"Vainilla, cuero, pachulí, caviar","aroma":"Cálido y lujoso con notas de cuero refinado","duracion":"Larga duración","ocasion":"Noche · Ocasiones especiales"},
+      "Central Park":{"familia":"Floral Amaderado","salida":"Ciruela, pimienta blanca","corazon":"Jazmín, tuberosa, flor de naranja","fondo":"Cedro, almizcle ambrette, almizcle blanco","aroma":"Floral amaderado atemporal inspirado en Central Park","duracion":"Moderada a larga","ocasion":"Primavera · Ocasiones especiales"},
+      "212 VIP":{"familia":"Oriental Dulce","salida":"Fruta de la pasión, lima, limón","corazon":"Fruta de la pasión exótica","fondo":"Notas amaderadas y dulces","aroma":"Glamoroso, dulce y leñoso, ícono moderno de juventud","duracion":"Larga duración","ocasion":"Fiesta · Noche"},
+      "212 VIP Black":{"familia":"Aromática Fougère","salida":"Absenta, anís, hinojo","corazon":"Lavanda","fondo":"Vaina de vainilla negra, almizcle","aroma":"Energético y especiado con carácter aromático oscuro","duracion":"Larga duración","ocasion":"Noche · Versátil"},
+      "212 MEN":{"familia":"Almizcle Amaderado","salida":"Notas verdes, toronja, bergamota, lavanda","corazon":"Jengibre, violeta, gardenia, salvia","fondo":"Almizcle, sándalo, incienso, vetiver, labdanum","aroma":"Fresco, especiado y amaderado con base rica","duracion":"6-8 horas","ocasion":"Primavera · Otoño"},
+      "Virgin Island Water":{"familia":"Frutal Floral Tropical","salida":"Mandarina, bergamota, coco","corazon":"Lima, jazmín, ylang-ylang","fondo":"Almizcle tonkín, maderas, hierbas","aroma":"Fresco tropical, suave y cálido como un atardecer caribeño","duracion":"8-10 horas","ocasion":"Vacaciones · Clima cálido"},
+      "Silver":{"familia":"Acuática Fresca","salida":"Cítricos, té verde, grosella negra","corazon":"Galbanum, petitgrain, acorde acuático","fondo":"Sándalo, almizcle blanco, minerales","aroma":"Fresco y crujiente como agua alpina pura","duracion":"10+ horas","ocasion":"Diaria · Primavera-Verano"},
+      "Viking":{"familia":"Aromático Leñoso","salida":"Limón, pimienta rosa, bergamota, mandarina","corazon":"Geranio, romero, salvia, nuez moscada, lavanda","fondo":"Cedro, sándalo, olíbano, pachulí, vetiver","aroma":"Masculino y poderoso con clase y confianza","duracion":"10+ horas","ocasion":"Formal · Eventos · Noche"},
+      "Veriver":{"familia":"Amaderada Aromática","salida":"Jengibre, cedro","corazon":"Vetiver, cedro","fondo":"Vetiver, base leñosa","aroma":"Intoxicante blend de jengibre, cedro y vetiver, clásico","duracion":"7-8 horas","ocasion":"Cenas íntimas · Oficina"},
+      "Santal":{"familia":"Especiada Oriental","salida":"Bergamota, lavanda, pimienta rosa","corazon":"Cilantro, canela, sándalo","fondo":"Sándalo, haba tonka, vainilla, jengibre","aroma":"Agradable aroma oriental especiado, fresco y cálido","duracion":"8-12 horas","ocasion":"Casual · Citas"},
+      "Original Aventus For Her":{"familia":"Cítrico Floral","salida":"Bergamota, manzana verde, limón, pimienta rosa","corazon":"Violeta, pachulí","fondo":"Pachulí, almizcle, maderas ámbar","aroma":"Refrescante, chispeante y elegante con sofisticación femenina","duracion":"10+ horas","ocasion":"Uso diario · Versátil"},
+      "Spring Flower":{"familia":"Floral Frutal","salida":"Jazmín, durazno, manzana","corazon":"Rosa, melón, jazmín","fondo":"Almizcle, ámbar gris","aroma":"Rica y florida equilibrando jazmín y durazno con calidez","duracion":"~6 horas","ocasion":"Día y noche · Fiestas"},
+      "Love In Black":{"familia":"Floral Especiado","salida":"Hojas de violeta, frambuesa, arándano","corazon":"Rosa búlgara, rosa turca, violeta, orris, jazmín indio","fondo":"Cedro de Virginia, almizcle dulce, cuero","aroma":"Sensual y elegante con carácter especiado","duracion":"8+ horas","ocasion":"Romántico · Noches elegantes"},
+      "Love In White":{"familia":"Floral Blanca","salida":"Flor de naranja, bergamota","corazon":"Magnolia, rosa búlgara, jazmín","fondo":"Sándalo, ámbar gris, vainilla, salvado de arroz","aroma":"Romántica con frescura polvorienta y florales embriagadores","duracion":"6-8 horas","ocasion":"Romántico · Citas"},
+      "Himalaya":{"familia":"Aromática Cítrica Leñosa","salida":"Toronja, limón","corazon":"Maderas aromáticas","fondo":"Maderas aromáticas, almizcle","aroma":"Fresco y exótico blend de maderas aromáticas con cítricos","duracion":"Larga duración","ocasion":"Diaria · Masculino"},
+      "Green Irish Tweed":{"familia":"Fresca Cítrica Leñosa","salida":"Limón, verbena, cítricos","corazon":"Limón, sándalo","fondo":"Sándalo, ámbar gris","aroma":"Fresco y sofisticado con ligeros cítricos y sándalo","duracion":"10+ horas","ocasion":"Diaria · Primavera-Otoño"},
+      "Bois du Portugal":{"familia":"Amaderada Aromática","salida":"Bergamota, lavanda","corazon":"Vetiver, cedro, sándalo","fondo":"Vetiver, cedro, sándalo, base leñosa","aroma":"Masculino, exótico y sofisticado con elegancia clásica","duracion":"12 horas","ocasion":"Bodas · Citas · Formal"},
+      "Aventus":{"familia":"Frutal Cítrico","salida":"Piña, bergamota, grosella negra, manzana","corazon":"Jazmín marroquí, rosa, notas florales","fondo":"Almizcle, vainilla, musgo de roble, ámbar gris","aroma":"Equilibrio de cítrico, floral y almizcle, masculino clásico","duracion":"12+ horas","ocasion":"Casual · Versátil · Todo el año"},
+      "Aventus Cologne":{"familia":"Frutal Cítrico","salida":"Piña, bergamota, grosella negra, manzana","corazon":"Jazmín marroquí, pachulí, maderas fragantes","fondo":"Almizcle, vainilla, musgo de roble, ámbar gris","aroma":"Equilibrado, cítrico y floral con excelente fijación","duracion":"12+ horas","ocasion":"Casual y formal · Día y noche"},
+      "Millesime Imperial":{"familia":"Cítrico Frutal Fresco","salida":"Limón siciliano, bergamota verde, mandarina","corazon":"Iris, limón, mandarina","fondo":"Sal marina, almizcle, notas frutales","aroma":"Elegante y sofisticado unisex, fresco y cítrico","duracion":"2-8 horas","ocasion":"Oficina · Eventos diurnos"},
+      "Wind Flowers Eau de Parfum":{"familia":"Floral","salida":"Durazno, flor de naranja","corazon":"Jazmín, jazmín sambac","fondo":"Almizcle","aroma":"Ramo floral con dulzura de durazno y flor de naranja","duracion":"Moderada a buena","ocasion":"Día y noche · Romántico"},
+      "Sauvage":{"familia":"Aromático Especiado","salida":"Bergamota calabresa, pimienta de Sichuan, elemi","corazon":"Pachulí, vainilla, notas ahumadas","fondo":"Amberwood, ámbar gris, notas marinas","aroma":"Cálido y robusto con bergamota especiada y pachulí terroso","duracion":"7-10 horas","ocasion":"Día y noche · Versátil"},
+      "Joy":{"familia":"Floral Cálido","salida":"Mandarina, bergamota","corazon":"Almizcle blanco, notas florales","fondo":"Sándalo, almizcle blanco","aroma":"Floral vibrante y amaderado con sonrisa de flores y cítricos","duracion":"Moderada a buena","ocasion":"Día y noche · Elegancia femenina"},
+      "J'Adore":{"familia":"Floral Frutal","salida":"Bergamota, pera, durazno, mandarina, melón","corazon":"Rosa de Damasco, lirio, jazmín, fresia, ylang-ylang","fondo":"Cedro, vainilla, almizcle, ciruela, tuberosa","aroma":"Rico y lujoso floral con fruta delicada, icónico","duracion":"Muy larga duración","ocasion":"Romántico · Sofisticado · Versátil"},
+      "Hypnotic Poison":{"familia":"Gourmand Especiado Cálido","salida":"Almendra amarga, coco, ciruela","corazon":"Jazmín sambac, madera de jacaranda, rosa","fondo":"Vainilla, almizcle, sándalo, almendra","aroma":"Cálido, dulce y adictivo con vainilla y almizcle embriagadores","duracion":"Excelente (queda en ropa)","ocasion":"Noche · Ocasiones especiales"},
+      "Homme Intense":{"familia":"Floral Leñoso","salida":"Lavanda","corazon":"Pera, iris, almizcle, semilla de ambrette","fondo":"Cedro de Virginia, vetiver, vainilla","aroma":"Casual pero provocativo con lavanda floral y notas leñosas","duracion":"Gran proyección y longevidad","ocasion":"Citas · Noche · Otoño-Invierno"},
+      "Fahrenheit":{"familia":"Leñoso Floral Especiado","salida":"Bergamota, madreselva, cítricos","corazon":"Madreselva, nuez moscada, violeta","fondo":"Sándalo, cedro, haba tonka, pachulí, vetiver","aroma":"Complejo, cálido y distinguido, fresco y audaz a la vez","duracion":"Buena duración","ocasion":"Negocios · Uso diurno · Sofisticado"},
+      "Addict":{"familia":"Oriental","salida":"Flor de árbol de seda, hoja de mandarina, flor de naranja","corazon":"Flor de la reina de la noche, rosa búlgara","fondo":"Vainilla bourbon, sándalo de Mysore, haba tonka","aroma":"Oriental vibrante con florales suntuosos y dulzura de vainilla","duracion":"Muy larga duración","ocasion":"Todo el día · Noche · Versátil"},
+      "Sauvage Elixir":{"familia":"Aromático Especiado Cálido","salida":"Cardamomo, canela, toronja, nuez moscada","corazon":"Lavanda, vainilla, regaliz","fondo":"Pachulí, vetiver, amberwood","aroma":"Cálido, especiado y aromático en formulación concentrada","duracion":"Muy larga duración","ocasion":"Noche · Sofisticado"},
+      "Miss Dior":{"familia":"Floral","salida":"Naranja sanguina, mandarina, bergamota","corazon":"Rosa centifolia con miel, lirio, peonía, iris","fondo":"Pachulí, acorde ambarino, almizcle","aroma":"Romántico ramo floral con frescura cítrica y elegancia polvorienta","duracion":"Moderada","ocasion":"Diaria · Casual · Fresco"},
+      "Midnight Poison":{"familia":"Frutal Especiado Cálido","salida":"Mandarina, bergamota","corazon":"Rosa, pachulí","fondo":"Vainilla bourbon, ámbar, pachulí, ambrox","aroma":"Sensual nocturna con frutas cítricas y base dulce cálida","duracion":"Larga duración","ocasion":"Noche · Ocasiones especiales"},
+      "Bottle Black":{"familia":"Amaderada Oriental","salida":"Mandarina, incienso","corazon":"Iris, raíz de higuera","fondo":"Cedro, cuero vegetal","aroma":"Versión oscura y sofisticada del Bottled con acentos orientales","duracion":"7-9 horas","ocasion":"Noche · Formal"},
+      "Bottled Intense":{"familia":"Amaderada Especiada","salida":"Manzana, flor de azahar, bergamota","corazon":"Geranio, canela, clavo, lavanda, cardamomo","fondo":"Sándalo, cedro, vetiver, vainilla","aroma":"Versión intensificada del clásico con especias más pronunciadas","duracion":"8-10 horas","ocasion":"Noche · Otoño-Invierno"},
+      "Bottled Night":{"familia":"Ámbar Floral","salida":"Lavanda, abedul","corazon":"Violeta","fondo":"Notas amaderadas, almizcle","aroma":"Fresco y amaderado con toques sedosos y seductores para la noche","duracion":"6-8 horas","ocasion":"Noche · Verano"},
+      "Bottled Oud":{"familia":"Oriental Amaderada","salida":"Manzana, cítricos","corazon":"Canela, azafrán, clavo, labdanum","fondo":"Oud, sándalo, aceite de cypriol","aroma":"Frutal fresco inicial con especias exóticas y rica base de oud","duracion":"8-10 horas","ocasion":"Noche · Otoño-Invierno"},
+      "Bottled Sport":{"familia":"Aromática","salida":"Toronja, aldehídos","corazon":"Lavanda, cardamomo","fondo":"Vetiver","aroma":"Fresco, energético y muy masculino para el hombre activo","duracion":"4-6 horas","ocasion":"Deporte · Uso diario"},
+      "Bottled Tonic":{"familia":"Amaderada Cítrica","salida":"Toronja, manzana, naranja amarga, limón","corazon":"Jengibre, canela, clavo, geranio","fondo":"Vetiver, notas amaderadas","aroma":"Cítrico fresco y especiado con ligereza y sofisticación moderna","duracion":"5-7 horas","ocasion":"Uso diario · Primavera-Verano"},
+      "Bottled Unlimited":{"familia":"Aromática Fougère","salida":"Menta, hojas de violeta, toronja","corazon":"Piña, canela, rosa","fondo":"Labdanum, sándalo, almizcle blanco","aroma":"Fresco y frutal con base masculina equilibrada","duracion":"5-7 horas","ocasion":"Uso diario · Primavera-Verano"},
+      "Bottled":{"familia":"Amaderada Especiada","salida":"Manzana, ciruela, limón, bergamota","corazon":"Canela, caoba, clavel","fondo":"Vainilla, sándalo, cedro, vetiver","aroma":"Clásico amaderado especiado con frescura frutal, icónico","duracion":"6-8 horas","ocasion":"Uso diario · Negocios"},
+      "Deep Red":{"familia":"Oriental Vainilla","salida":"Naranja sanguina, grosella negra, clementina, pera","corazon":"Jengibre, azafrán, tuberosa, fresia, hibisco","fondo":"Vainilla, sándalo, almizcle, cedro","aroma":"Frutal-floral cálida y sensual para mujeres fuertes","duracion":"7-9 horas","ocasion":"Noche · Otoño-Invierno"},
+      "HB Infinite":{"familia":"Amaderada Aromática","salida":"Manzana, mandarina, canela, salvia","corazon":"Lavanda, pachulí, romero","fondo":"Sándalo, olivo","aroma":"Energizante y sensual combinando frescura cítrica con aromáticas","duracion":"6-8 horas","ocasion":"Uso diario · Negocios"},
+      "Hugo Man":{"familia":"Aromática Leñosa","salida":"Manzana verde, menta, pomelo, albahaca","corazon":"Salvia, geranio, clavel, jazmín","fondo":"Pino, bálsamo de abeto, notas amaderadas","aroma":"Fresco y vibrante con toques aromáticos de manzana verde","duracion":"5-6 horas","ocasion":"Uso diario · Primavera-Verano"},
+      "Hugo Red":{"familia":"Oriental Especiada","salida":"Notas metálicas, toronja, pimienta rosa, galbano","corazon":"Ruibarbo, piña, cedro","fondo":"Ámbar, haba tonka","aroma":"Contraste entre acordes fríos y cálidos, audaz y único","duracion":"6-8 horas","ocasion":"Uso diario · Noche"},
+      "Hugo Reversed":{"familia":"Aromática Leñosa","salida":"Toronja, bergamota de Calabria","corazon":"Romero","fondo":"Vetiver de Haití","aroma":"Fresco cítrico con toques herbales y base leñosa","duracion":"5-7 horas","ocasion":"Uso diario · Primavera-Verano"},
+      "Hugo Woman Eau de Parfum":{"familia":"Floral Frutal","salida":"Zarzamora, mandarina italiana, hierba","corazon":"Ciruela, té negro, jazmín, iris","fondo":"Sándalo, ámbar, cedro","aroma":"Frutal y floral sofisticado con toque de té negro moderno","duracion":"6-8 horas","ocasion":"Uso diario · Noche"},
+      "In Motion":{"familia":"Ámbar Fougère","salida":"Naranja, bergamota, albahaca, hojas de violeta","corazon":"Pimienta rosa, canela, nuez moscada, cardamomo","fondo":"Almizcle, sándalo, notas amaderadas, vetiver","aroma":"Dinámico y vibrante con cítricos y especias cálidas","duracion":"5-7 horas","ocasion":"Uso diario · Negocios"},
+      "Just Different":{"familia":"Aromática","salida":"Menta, manzana Granny Smith","corazon":"Albahaca, fresia, cilantro","fondo":"Cashmeran, pachulí, labdanum, olíbano","aroma":"Fresco y audaz con frutas nítidas y notas leñosas profundas","duracion":"6-8 horas","ocasion":"Uso diario · Primavera-Verano"},
+      "Orange for Men":{"familia":"Especiada Amaderada","salida":"Cilantro, manzana roja","corazon":"Incienso, pimienta de Sichuan","fondo":"Vainilla, notas amaderadas","aroma":"Optimista, vital y energético con bienestar y espontaneidad","duracion":"5-7 horas","ocasion":"Uso diario · Primavera-Verano"},
+      "The Scent for Her":{"familia":"Floral Frutal Gourmand","salida":"Durazno, fresia","corazon":"Osmanto","fondo":"Cacao","aroma":"Floral frutal sofisticado con toques gourmand sensuales","duracion":"5-7 horas","ocasion":"Noche · Otoño-Invierno"},
+      "The Scent":{"familia":"Ambarada Leñosa Frutal","salida":"Jengibre, mandarina, bergamota","corazon":"Maninka, lavanda","fondo":"Cuero, notas amaderadas","aroma":"Especiado y sensual con frescura cítrica carismática","duracion":"4-6 horas","ocasion":"Noche · Citas"},
+      "XX":{"familia":"Floral Frutal","salida":"Lichi, grosella negra, mandarina","corazon":"Jazmín, rosa, arroz basmati","fondo":"Sándalo, ámbar, almizcle","aroma":"Balance sofisticado entre notas frutales y florales femeninas","duracion":"5-7 horas","ocasion":"Uso diario · Noche"},
+      "Allegra Riva Solare":{"familia":"Floral Solar","salida":"Bergamota de Calabria","corazon":"Flor de azahar, osmanto, mandarina","fondo":"Almizcle","aroma":"Transporte sensorial a la Riviera Italiana con esencia del sol","duracion":"6-8 horas","ocasion":"Primavera-Verano · Vacaciones"},
+      "Amarena":{"familia":"Floral Frutal","salida":"Cereza, granada, tuberosa","corazon":"Rosa","fondo":"Notas polvosas","aroma":"Frutal-floral sofisticada con cereza como protagonista","duracion":"5-7 horas","ocasion":"Uso diario · Noche"},
+      "Aqva Amara":{"familia":"Acuática Marina Cítrica","salida":"Mandarina de Sicilia","corazon":"Neroli","fondo":"Pachulí indonesio, olíbano blanco","aroma":"Reinterpretación atrevida del acuático con carácter mediterráneo","duracion":"6-8 horas","ocasion":"Uso diario · Primavera-Verano"},
+      "Aqva Marine":{"familia":"Acuática Aromática","salida":"Toronja, neroli, mandarina, petitgrain","corazon":"Notas acuáticas, alga marina, romero","fondo":"Cedro de Virginia, ámbar","aroma":"Captura la esencia fresca del océano con algas salinas","duracion":"5-7 horas","ocasion":"Uso diario · Primavera-Verano"},
+      "BLV Pour Homme":{"familia":"Especiada Amaderada","salida":"Cardamomo, sándalo","corazon":"Jengibre, enebro, galanga","fondo":"Flor de tabaco, hojas verdes, madera de teca","aroma":"Fresco especiado-amaderado elegante y refinado","duracion":"6-8 horas","ocasion":"Uso diario · Negocios"},
+      "Bvlgari Aqva":{"familia":"Acuática Marina","salida":"Toronja, neroli, mandarina, petitgrain","corazon":"Notas acuáticas, alga marina, romero","fondo":"Cedro de Virginia, ámbar","aroma":"Clásico acuático que captura la esencia del mar","duracion":"5-7 horas","ocasion":"Uso diario · Primavera-Verano"},
+      "Calaluna":{"familia":"Floral Especiada","salida":"Pera","corazon":"Heliotropo, cardamomo","fondo":"Sándalo, ambrette, iris","aroma":"Floral-amaderada sofisticada con iris blanco delicado","duracion":"6-8 horas","ocasion":"Uso diario · Noche"},
+      "Man Extreme":{"familia":"Leñosa Fresca","salida":"Bergamota de Calabria, toronja rosa, pulpa de cactus","corazon":"Fresia blanca, cardamomo, ámbar vegetal","fondo":"Vetiver, benzoin, cedro","aroma":"Fresco y limpio con cítricos nítidos y toques leñosos","duracion":"6-8 horas","ocasion":"Uso diario · Primavera-Verano"},
+      "Man IN Black":{"familia":"Oriental Especiada","salida":"Especias, ron, tabaco","corazon":"Cuero, iris, tuberosa","fondo":"Haba tonka, madera guayaco, benzoin","aroma":"Sensual y opulento con especias cálidas y base de cuero","duracion":"7-9 horas","ocasion":"Noche · Otoño-Invierno"},
+      "Man Wood Essence":{"familia":"Amaderada","salida":"Cilantro, pimienta de Sichuan","corazon":"Ciprés, madera de cachemira","fondo":"Cedro, pachulí, vetiver, madera guayaco","aroma":"Revitalizante amaderado que reconecta con la naturaleza","duracion":"8-10 horas","ocasion":"Uso diario · Otoño-Invierno"},
+      "Noorah":{"familia":"Chypre Floral","salida":"Galbano, cardamomo verde","corazon":"Benzoin de Laos, miel, iris","fondo":"Roble, pachulí, vainilla","aroma":"Oriental y alegre con aspecto cálido-frío sofisticado","duracion":"7-9 horas","ocasion":"Uso diario · Noche"},
+      "Omnia Amethyste":{"familia":"Floral Amaderada","salida":"Notas verdes, toronja rosa","corazon":"Iris, rosa búlgara","fondo":"Heliotropo, notas amaderadas","aroma":"Fresco y polvoso inspirado en la suavidad de la amatista","duracion":"4-6 horas","ocasion":"Día · Primavera-Verano"},
+      "Omnia Coral":{"familia":"Floral Frutal","salida":"Bergamota, bayas de goji","corazon":"Granada, hibisco, lirio acuático","fondo":"Almizcle, cedro de Virginia","aroma":"Romántica floral-frutal que se asienta en notas leñosas","duracion":"5-7 horas","ocasion":"Día · Primavera-Verano"},
+      "Omnia Cristalline":{"familia":"Floral Fresco","salida":"Bambú, pera nashi","corazon":"Loto, té, cassia","fondo":"Almizcle, madera guayaco, musgo de roble","aroma":"Luminosa y fresca con transparencia etérea de loto","duracion":"4-6 horas","ocasion":"Día · Primavera-Verano"},
+      "Omnia Pink Sapphire":{"familia":"Floral Frutal","salida":"Pomelo rosa, toronja, pimienta rosa","corazon":"Frangipani, flor tiare, durazno, rosa","fondo":"Almizcle, violeta, vainilla, notas amaderadas","aroma":"Radiante floral-frutal con vainilla cremosa","duracion":"5-7 horas","ocasion":"Día · Primavera-Verano"},
+      "Pour Homme Soir":{"familia":"Floral Amaderada","salida":"Té Darjeeling","corazon":"Papiro","fondo":"Ámbar, almizcle","aroma":"Elegante y sensual para hombres carismáticos de noche","duracion":"6-8 horas","ocasion":"Noche · Otoño-Invierno"},
+      "L.12.12 Floral":{"familia":"Floral Frutal","salida":"Toronja, bergamota, notas verdes","corazon":"Rosa, peonía, flor de naranja","fondo":"Almizcle blanco, cedro, ámbar","aroma":"Floral femenino fresco y fácil de llevar","duracion":"5-7 horas","ocasion":"Uso diario · Primavera-Verano"},
+      "Bleu":{"familia":"Aromática Cítrica","salida":"Menta, toronja, flor de naranjo africana","corazon":"Salvia, helecho, notas acuosas","fondo":"Pachulí, maderas de ámbar, musgo de roble","aroma":"Fresco y acuoso con predominio cítrico deportivo","duracion":"6-8 horas","ocasion":"Casual · Deporte · Día"},
+      "Challenge":{"familia":"Cítrica Aromática","salida":"Mandarina, bergamota, limón","corazon":"Notas herbáceas","fondo":"Madera de teca, ébano","aroma":"Energético y cítrico con notas de madera","duracion":"5-7 horas","ocasion":"Casual · Deporte · Día"},
+      "Energized":{"familia":"Aromática Cítrica","salida":"Mandarina, bergamota, citronela","corazon":"Cardamomo, pimienta","fondo":"Cedro, vetiver","aroma":"Dinámico y energizante con toques cítricos vibrantes","duracion":"5-7 horas","ocasion":"Casual · Deporte · Día"},
+      "Joy OF Pink":{"familia":"Floral Frutal","salida":"Toronja, pimienta rosa","corazon":"Peonía, notas florales","fondo":"Cedro, almizcles","aroma":"Fresco y frutal con toques florales alegres","duracion":"5-7 horas","ocasion":"Casual · Día · Primavera"},
+      "L.12.12 Blanc":{"familia":"Aromática Cítrica","salida":"Toronja, cardamomo, romero","corazon":"Tuberosa, ylang-ylang, violeta","fondo":"Vetiver, ante, cedro de Virginia","aroma":"Fresco y aromático con notas cítricas y especiadas","duracion":"4-6 horas","ocasion":"Casual · Deporte · Día"},
+      "L.12.12 Élégant":{"familia":"Floral Frutal","salida":"Pimienta rosa, toronja, mandarina","corazon":"Jazmín, hibisco","fondo":"Cedro, almizcles","aroma":"Elegante y sofisticado con toques florales femeninos","duracion":"5-7 horas","ocasion":"Formal · Día · Primavera"},
+      "L.12.12 Essential":{"familia":"Aromática Cítrica","salida":"Cítricos acuosos, mandarina, bergamota","corazon":"Notas florales","fondo":"Sándalo","aroma":"Fresco y energético con notas acuosas puras","duracion":"4-6 horas","ocasion":"Casual · Deporte · Día"},
+      "L.12.12 Jane":{"familia":"Floral Frutal","salida":"Bergamota, mandarina, frutos rojos","corazon":"Rosa, peonía, jazmín","fondo":"Almizcle, madera de cachemira, cedro","aroma":"Fresco floral femenino con elegancia casual","duracion":"5-7 horas","ocasion":"Uso diario · Primavera-Verano"},
+      "L.12.12 Natural":{"familia":"Floral Frutal","salida":"Piña, mandarina, hoja de frambuesa","corazon":"Rosa, iris","fondo":"Iris raíz, notas amaderadas","aroma":"Femenino y fresco con toques naturales delicados","duracion":"5-7 horas","ocasion":"Casual · Día · Primavera"},
+      "L.12.12 Noir":{"familia":"Aromática Oriental","salida":"Sandía, bergamota","corazon":"Albahaca, verbena, lavanda","fondo":"Chocolate negro, cashmeran, cumarina, pachulí","aroma":"Fresco y frutal con notas especiadas oscuras sorprendentes","duracion":"6-8 horas","ocasion":"Casual · Noche · Otoño"},
+      "L.12.12 Rouge":{"familia":"Oriental Especiada","salida":"Té rooibos, mandarina, mango","corazon":"Pimienta, cardamomo","fondo":"Notas maderosas","aroma":"Apasionado y especiado con toques frutales tropicales","duracion":"6-8 horas","ocasion":"Casual · Noche · Primavera"},
+      "L.12.12 Sparkling":{"familia":"Floral Frutal","salida":"Toronja rosa, grosella negra","corazon":"Rosa, peonía, magnolia","fondo":"Almizcles blancos, cedro, ambroxan","aroma":"Fresco y frutal con toques florales brillantes y efervescentes","duracion":"5-7 horas","ocasion":"Casual · Día · Primavera"},
+      "L.12.12 Vert":{"familia":"Aromática Cítrica","salida":"Menta, toronja, flor de naranjo africana","corazon":"Salvia, helecho","fondo":"Notas maderosas","aroma":"Fresco y herbáceo con predominio de cítricos verdes","duracion":"5-7 horas","ocasion":"Casual · Deporte · Día"},
+      "L.12.12 Fraîche":{"familia":"Aromática Cítrica","salida":"Jengibre, limón, toronja","corazon":"Enebro, lavanda, manzana","fondo":"Vetiver, cedro, ambroxan","aroma":"Fresco, limpio y refrescante con energía cítrica","duracion":"4-6 horas","ocasion":"Casual · Deporte · Verano"},
+      "Red":{"familia":"Aromática Herbácea","salida":"Manzana verde, thuja, pino","corazon":"Jazmín","fondo":"Cedro","aroma":"Fresco y herbáceo con toques verdes y maderosos","duracion":"5-7 horas","ocasion":"Casual · Deporte · Día"},
+      "Sensual":{"familia":"Floral Oriental","salida":"Pimienta rosa, grosella negra","corazon":"Rosa turca, guisante de olor, gladiolo","fondo":"Notas amaderadas","aroma":"Sensual y especiado con toques florales elegantes","duracion":"6-8 horas","ocasion":"Noche · Formal · Otoño"},
+      "Touch OF Pink":{"familia":"Floral Frutal","salida":"Hojas de cilantro, naranja sanguina","corazon":"Jazmín, hojas de violeta, semillas de zanahoria","fondo":"Notas maderosas cálidas","aroma":"Fresco y frutal con notas florales luminosas","duracion":"5-7 horas","ocasion":"Casual · Día · Primavera"},
+      "Daisy Eau SO Fresh":{"familia":"Floral Frutal","salida":"Frambuesa roja, toronja, pera","corazon":"Violeta, rosa silvestre, flor de manzana","fondo":"Almizcles, cedro, ciruela","aroma":"Fresco y frutal con toques florales delicados y juveniles","duracion":"5-7 horas","ocasion":"Casual · Día · Primavera"},
+      "Daisy Twinkle":{"familia":"Floral Frutal","salida":"Grosella negra, jazmín","corazon":"Flor de loto, rosas","fondo":"Almizcles, maderas blancas","aroma":"Fresco y luminoso con toques florales delicados","duracion":"5-7 horas","ocasion":"Casual · Día · Primavera"},
+      "Daisy":{"familia":"Floral Frutal","salida":"Fresa, toronja sanguina, frambuesa","corazon":"Violeta, gardenia, jazmín","fondo":"Vainilla, maderas blancas, almizcles","aroma":"Afrutado y floral con toque vintage de violeta, icónico","duracion":"6-8 horas","ocasion":"Casual · Día · Primavera"},
+      "Decadence Eau SO Decadent":{"familia":"Floral Frutal","salida":"Ciruela, mandarina","corazon":"Iris, rosa búlgara, azafrán","fondo":"Pachulí, almizcles","aroma":"Sensual y sofisticado con elegancia frutal-floral","duracion":"6-8 horas","ocasion":"Noche · Formal · Otoño"},
+      "Decadence":{"familia":"Oriental Floral","salida":"Ciruela, iris, azafrán","corazon":"Rosa búlgara, jazmín sambac","fondo":"Pachulí, almizcles, maderas","aroma":"Sofisticado y sensual con toque oriental profundo","duracion":"8-10 horas","ocasion":"Noche · Formal · Otoño"},
+      "1 Million Parfum":{"familia":"Oriental Especiada","salida":"Mandarina, menta, toronja","corazon":"Pimienta especiada, canela","fondo":"Cuero rubio, pachulí indio, ámbar","aroma":"Cálido y especiado con toque de cuero, más intenso que el original","duracion":"8-12 horas","ocasion":"Noche · Formal · Todo el año"},
+      "Black XS Excess":{"familia":"Oriental Aromática","salida":"Canela, cardamomo negro, praline","corazon":"Ámbar negro, ebonita","fondo":"Notas maderosas cálidas","aroma":"Cálido y aromático con notas especiadas intensas","duracion":"8-10 horas","ocasion":"Noche · Formal · Otoño"},
+      "Black XS L'Aphrodisiaque":{"familia":"Floral Oriental","salida":"Canela, cardamomo","corazon":"Rosa, notas florales cálidas","fondo":"Ámbar, pachulí","aroma":"Sensual y afrodisíaco con toques especiados femeninos","duracion":"8-10 horas","ocasion":"Noche · Formal · Otoño"},
+      "Black XS":{"familia":"Oriental Aromática","salida":"Canela, cardamomo negro, limón, tagete","corazon":"Ámbar negro, ebonita","fondo":"Pachulí, maderas maderosas","aroma":"Cálido y aromático con especias audaces y carácter rockero","duracion":"8-10 horas","ocasion":"Noche · Formal · Todo el año"},
+      "Fabulous":{"familia":"Floral Especiada","salida":"Mandarina, pimienta rosa","corazon":"Tuberosa, ylang-ylang, jazmín","fondo":"Vainilla, pachulí, almizcles","aroma":"Cálido y sensual con toques florales especiados femeninos","duracion":"8-10 horas","ocasion":"Noche · Formal · Otoño"},
+      "Fame":{"familia":"Floral Frutal","salida":"Mango jugoso, bergamota","corazon":"Jazmín puro, incienso cremoso","fondo":"Almizcles, maderas aromáticas","aroma":"Cálido, afrutado y sensual con toque de incienso moderno","duracion":"8-10 horas","ocasion":"Noche · Formal · Todo el año"},
+      "Invictus Intense":{"familia":"Aromática Especiada","salida":"Pimienta negra, flor de naranjo","corazon":"Laureles, whiskey","fondo":"Sal marina, maderas","aroma":"Vigoroso e intoxicante con especias audaces y carácter intenso","duracion":"8-10 horas","ocasion":"Casual · Deporte · Noche"},
+      "Invictus Legend":{"familia":"Aromática Marina","salida":"Sal marina, toronja, notas marinas","corazon":"Especias, geranio, hoja de laurel","fondo":"Maderas guaiac, ámbar rojo","aroma":"Fresco y vigoroso con toques marinos legendarios","duracion":"8-10 horas","ocasion":"Casual · Deporte · Noche"},
+      "Invictus Parfum":{"familia":"Aromática Maderera","salida":"Lavanda fresca","corazon":"Cuero sensual","fondo":"Sándalo profundo","aroma":"Profundo y masculino con notas maderosas concentradas","duracion":"10-12 horas","ocasion":"Noche · Formal · Todo el año"},
+      "Invictus Platinum":{"familia":"Aromática Especiada","salida":"Toronja, absenta, ciprés","corazon":"Lavanda","fondo":"Pachulí","aroma":"Vigoroso y refrescante con toque herbáceo moderno","duracion":"8-10 horas","ocasion":"Casual · Deporte · Noche"},
+      "Invictus":{"familia":"Aromática Marina","salida":"Mandarina, notas marinas, toronja","corazon":"Jazmín, hoja de laurel","fondo":"Pachulí indio, musgo de roble, maderas guaiac","aroma":"Fresco y vigoroso con toques marinos, éxito mundial","duracion":"8-10 horas","ocasion":"Casual · Deporte · Noche"},
+      "Lady Million Empire":{"familia":"Floral Gourmand","salida":"Toronja, mandarina","corazon":"Flor de naranjo, notas florales blancas","fondo":"Maderas, vainilla","aroma":"Cálido y sofisticado con toques florales imperiales","duracion":"8-10 horas","ocasion":"Noche · Formal · Otoño"},
+      "Lady Million Lucky":{"familia":"Floral Gourmand","salida":"Frambuesa dulce","corazon":"Rosa, jazmín, avellana","fondo":"Miel, sándalo, madera cachemira, cedro","aroma":"Dulce y sensual con toques maderosos y suerte","duracion":"8-10 horas","ocasion":"Noche · Formal · Otoño"},
+      "Lady Million Privé":{"familia":"Oriental Gourmand","salida":"Frambuesa, flor de naranja","corazon":"Jazmín, notas florales","fondo":"Miel, cacao, pachulí","aroma":"Cálido y sensual con toque gourmand exclusivo","duracion":"10-12 horas","ocasion":"Noche · Formal · Todo el año"},
+      "Lady Million Royal":{"familia":"Oriental Gourmand","salida":"Granada, pimienta rosa","corazon":"Flores blancas","fondo":"Maderas aromáticas, vainilla","aroma":"Regio y sofisticado con toques florales poderosos","duracion":"8-10 horas","ocasion":"Noche · Formal · Otoño"},
+      "Lady Million":{"familia":"Floral Gourmand","salida":"Frambuesa, toronja, limón","corazon":"Flor de naranjo, jazmín, miel blanca","fondo":"Pachulí, maderas amaderadas","aroma":"Cálido y sensual con toque dulce y glamoroso","duracion":"8-10 horas","ocasion":"Noche · Formal · Otoño"},
+      "Olympea":{"familia":"Floral Marina","salida":"Mandarina verde, agua de jazmín","corazon":"Flor de jengibre","fondo":"Vainilla cálida, ambergris","aroma":"Fresco y femenino con toques florales acuosos divinos","duracion":"8-10 horas","ocasion":"Casual · Día · Primavera"},
+      "One Million Elixir":{"familia":"Oriental Gourmand","salida":"Notas aromáticas especiadas","corazon":"Ámbar cálido, maderas especiadas","fondo":"Vainilla negra sensual","aroma":"Cálido y sensual con toques ambarinos profundos","duracion":"10-12 horas","ocasion":"Noche · Formal · Todo el año"},
+      "One Million Lucky":{"familia":"Aromática Maderera","salida":"Bergamota, toronja, ciruela","corazon":"Cedro, madera cachemira, miel, jazmín","fondo":"Vetiver, musgo de roble, pachulí","aroma":"Fresco y vigoroso con notas maderosas con suerte","duracion":"8-10 horas","ocasion":"Casual · Noche · Todo el año"},
+      "One Million Privé":{"familia":"Oriental Especiada","salida":"Notas aromáticas cálidas","corazon":"Especias cálidas, maderas","fondo":"Ámbar, vainilla","aroma":"Sofisticado y sensual con toques especiados exclusivos","duracion":"10-12 horas","ocasion":"Noche · Formal · Otoño"},
+      "One Million Royal":{"familia":"Oriental Especiada","salida":"Notas aromáticas finas","corazon":"Maderas especiadas, notas florales","fondo":"Ámbar cálido, vainilla","aroma":"Regio y sofisticado con toque especiado exclusivo","duracion":"10-12 horas","ocasion":"Noche · Formal · Todo el año"},
+      "One Million":{"familia":"Oriental Especiada","salida":"Mandarina sanguina, menta, toronja","corazon":"Pimienta especiada, canela, rosa","fondo":"Cuero rubio, pachulí indio, ámbar, maderas","aroma":"Cálido y especiado con cuero y ámbar, ícono masculino","duracion":"10-12 horas","ocasion":"Noche · Formal · Todo el año"},
+      "Onix Invictus":{"familia":"Aromática Oriental","salida":"Cítricos, notas especiadas","corazon":"Notas aromáticas, madera","fondo":"Ámbar oscuro, almizcle","aroma":"Versión oscura y misteriosa de la familia Invictus","duracion":"8-10 horas","ocasion":"Noche · Formal · Otoño-Invierno"},
+      "Black XS L'Exces For Her":{"familia":"Floral Oriental","salida":"Canela, cardamomo","corazon":"Cacao, rosa negra, violeta","fondo":"Vainilla, pachulí","aroma":"Sensual y femenino con toques especiados oscuros","duracion":"8-10 horas","ocasion":"Noche · Formal · Otoño"},
+      "Invictus Victory Elixir":{"familia":"Oriental Maderera","salida":"Cardamomo especiado, lavanda","corazon":"Incienso, maderas ahumadas","fondo":"Pachulí, vainilla cálida","aroma":"Profundo y amaderado con toques especiados victoriosos","duracion":"10-12 horas","ocasion":"Noche · Formal · Todo el año"},
+      "Phantom Legion":{"familia":"Aromática Maderera","salida":"Lavanda, limón","corazon":"Notas herbáceas, maderas","fondo":"Notas maderosas oscuras, almizcle","aroma":"Versión legionaria oscura del Phantom con carácter intenso","duracion":"8-10 horas","ocasion":"Noche · Casual · Todo el año"},
+      "Phantom Negra":{"familia":"Aromática Maderera","salida":"Lavanda, cardamomo","corazon":"Maderas ahumadas, notas herbáceas","fondo":"Pachulí, ámbar","aroma":"Oscuro y profundo con toque ahumado y misterioso","duracion":"10-12 horas","ocasion":"Noche · Formal · Otoño"},
+      "Phantom":{"familia":"Aromática Maderera","salida":"Lavanda, limón, vainilla","corazon":"Notas herbáceas, maderas","fondo":"Notas maderosas cálidas","aroma":"Terroso y amaderado con toque lavandero futurista","duracion":"8-10 horas","ocasion":"Casual · Noche · Todo el año"},
+      "Pure XS":{"familia":"Oriental Especiada","salida":"Notas cítricas frescas, pimienta","corazon":"Especias cálidas, maderas","fondo":"Ámbar, vainilla","aroma":"Fresco y sofisticado con toque especiado excesivo","duracion":"8-10 horas","ocasion":"Casual · Noche · Todo el año"},
+      "Victory":{"familia":"Aromática Marina","salida":"Acuerdo marino, toronja","corazon":"Lavanda, notas aromáticas","fondo":"Sándalo, maderas","aroma":"Fresco y vigoroso con toque marino victorioso","duracion":"8-10 horas","ocasion":"Casual · Deporte · Noche"}
+    };
+
+    // ══ FUNCIONES MODAL ══
+    function openModal(btn) {
+      const card  = btn.closest('.product-card');
+      const img   = card.querySelector('img');
+      const brand = card.querySelector('.product-brand').textContent.trim();
+      const name  = card.querySelector('.product-name').textContent.trim();
+
+      document.getElementById('modalImg').src   = img.src;
+      document.getElementById('modalImg').alt   = name;
+      document.getElementById('modalBrand').textContent = brand.toUpperCase();
+      document.getElementById('modalName').textContent  = name;
+
+      const d = perfumeData[name] || {};
+      document.getElementById('modalFamilia').textContent  = d.familia  || '—';
+      document.getElementById('modalSalida').textContent   = d.salida   || '—';
+      document.getElementById('modalCorazon').textContent  = d.corazon  || '—';
+      document.getElementById('modalFondo').textContent    = d.fondo    || '—';
+      document.getElementById('modalAroma').textContent    = d.aroma    || '—';
+      document.getElementById('modalDuracion').textContent = '\u23f1 ' + (d.duracion || '—');
+      document.getElementById('modalOcasion').textContent  = '\u2726 ' + (d.ocasion  || '—');
+
+      document.getElementById('modalOverlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    // Modal simplificado para accesorios del Shop (solo imagen + nombre + precio)
+    function openShopImg(btn) {
+      const card  = btn.closest('.product-card');
+      const img   = card.querySelector('img');
+      const name  = card.querySelector('.product-name').textContent.trim();
+      const precio = card.querySelector('.shop-precio') ? card.querySelector('.shop-precio').textContent.trim() : '';
+
+      if (!img) return;
+      document.getElementById('modalImg').src  = img.src;
+      document.getElementById('modalImg').alt  = name;
+      document.getElementById('modalBrand').textContent = precio ? precio : 'VÉLARO SHOP';
+      document.getElementById('modalName').textContent  = name;
+      document.getElementById('modalFamilia').textContent  = '';
+      document.getElementById('modalSalida').textContent   = '';
+      document.getElementById('modalCorazon').textContent  = '';
+      document.getElementById('modalFondo').textContent    = '';
+      document.getElementById('modalAroma').textContent    = '';
+      document.getElementById('modalDuracion').textContent = '';
+      document.getElementById('modalOcasion').textContent  = '';
+      document.getElementById('modalOverlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModalOutside(e) {
+      if (e.target === document.getElementById('modalOverlay')) closeModal();
+    }
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeModal();
+        closeCart();
+      }
+    });
+
+    /* ══ CARRITO ══ */
+    const WHATSAPP_NUMBER = '573193369222';
+    let cart = [];
+
+    function addToCart(btn) {
+      const card  = btn.closest('.product-card');
+      const img   = card.querySelector('img').src;
+      const brand = card.querySelector('.product-brand').textContent.trim();
+      const name  = card.querySelector('.product-name').textContent.trim();
+      const key   = brand + '|' + name;
+      if (cart.find(i => i.key === key)) {
+        removeFromCart(key);
+        btn.textContent = '+ Agregar';
+        btn.classList.remove('in-cart');
+        return;
+      }
+      cart.push({ key, brand, name, img });
+      btn.textContent = '✓ Agregado';
+      btn.classList.add('in-cart');
+      renderCart();
+      flashFab();
+    }
+
+    function removeFromCart(key) {
+      cart = cart.filter(i => i.key !== key);
+      // Desmarcar botón en la tarjeta
+      document.querySelectorAll('.product-btn-cart').forEach(b => {
+        const card  = b.closest('.product-card');
+        const brand = card.querySelector('.product-brand').textContent.trim();
+        const name  = card.querySelector('.product-name').textContent.trim();
+        if ((brand + '|' + name) === key) {
+          b.textContent = '+ Agregar';
+          b.classList.remove('in-cart');
+        }
+      });
+      renderCart();
+    }
+
+    function clearCart() {
+      cart = [];
+      document.querySelectorAll('.product-btn-cart.in-cart').forEach(b => {
+        b.textContent = '+ Agregar';
+        b.classList.remove('in-cart');
+      });
+      renderCart();
+    }
+
+    function renderCart() {
+      const list  = document.getElementById('cartItemsList');
+      const empty = document.getElementById('cartEmpty');
+      const badge = document.getElementById('cartBadge');
+      const count = document.getElementById('cartCountLabel');
+      const waBtn = document.getElementById('cartWhatsappBtn');
+      const clrBtn= document.getElementById('cartClearBtn');
+
+      badge.textContent = cart.length;
+      badge.classList.toggle('visible', cart.length > 0);
+      count.textContent = cart.length;
+      waBtn.disabled    = cart.length === 0;
+      clrBtn.style.display = cart.length > 0 ? 'block' : 'none';
+
+      // Limpiar items anteriores (preservar empty div)
+      list.querySelectorAll('.cart-item').forEach(el => el.remove());
+
+      if (cart.length === 0) {
+        empty.style.display = 'flex';
+        return;
+      }
+      empty.style.display = 'none';
+
+      cart.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'cart-item';
+        div.innerHTML =
+          '<img class="cart-item-img" src="' + item.img + '" alt="' + item.name + '">' +
+          '<div class="cart-item-info">' +
+            '<p class="cart-item-brand">' + item.brand + '</p>' +
+            '<p class="cart-item-name">'  + item.name  + '</p>' +
+          '</div>' +
+          '<button class="cart-item-remove" onclick="removeFromCart(\'' + item.key.replace(/'/g, "\\'") + '\')">✕</button>';
+        list.appendChild(div);
+      });
+    }
+
+    function sendWhatsApp() {
+      if (cart.length === 0) return;
+      const lines = cart.map(i => '• ' + i.brand + ' — ' + i.name);
+      const msg = '¡Hola! Quiero comprar los siguientes productos de VÉLARO:\n\n'
+                + lines.join('\n')
+                + '\n\n¿Me pueden indicar disponibilidad y precio?';
+      const url = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(msg);
+      window.open(url, '_blank');
+    }
+
+    function openCart() {
+      document.getElementById('cartDrawer').classList.add('open');
+      document.getElementById('cartOverlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeCart() {
+      document.getElementById('cartDrawer').classList.remove('open');
+      document.getElementById('cartOverlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function flashFab() {
+      const fab = document.getElementById('cartFab');
+      fab.style.transform = 'scale(1.2)';
+      setTimeout(() => { fab.style.transform = ''; }, 200);
+    }
+
+    /* ══ SHOP — Google Sheets integration ══
+       Columnas del Sheet (fila 1 = encabezados, ignorados):
+       A: Número  B: Marca  C: Nombre  D: ID foto Drive
+       E: Familia  F: Salida  G: Corazón  H: Fondo  I: Aroma  J: Duración  K: Ocasión
+    */
+    // ID del Google Sheet (visible en la URL de edición)
+    const SHEET_ID = '16wIlf6fVgEyzHKIbF82ydSCTjpbqQ9Y4AquxFYkpvy0';
+
+    function driveImgUrl(id) {
+      return 'https://lh3.googleusercontent.com/d/' + id.trim() + '=w600';
+    }
+
+    function buildShopCard(row, index) {
+      // Columnas: 0=# 1=Nombre 2=Precio 3=ID Foto
+      const name    = (row[1] || '').trim();
+      const precio  = (row[2] || '').trim();
+      const driveId = (row[3] || '').trim();
+      if (!name) return null;
+
+      const imgSrc = driveId ? driveImgUrl(driveId) : '';
+      const padNum = String(index + 1).padStart(2, '0');
+
+      const card = document.createElement('div');
+      card.className = 'product-card';
+      card.innerHTML =
+        '<div class="product-img-wrap" onclick="openShopImg(this)" style="cursor:pointer">' +
+          '<span class="product-number">' + padNum + '</span>' +
+          (imgSrc
+            ? '<img src="' + imgSrc + '" alt="' + name + '" loading="lazy" onerror="this.style.display=\'none\'">'
+            : '<div class="shop-no-img">📷</div>') +
+        '</div>' +
+        '<div class="product-info">' +
+          (precio ? '<span class="product-brand shop-precio">' + precio + '</span>' : '') +
+          '<p class="product-name">' + name + '</p>' +
+          '<div class="product-separator"></div>' +
+        '</div>' +
+        '<div class="product-actions">' +
+          '<button class="product-btn" onclick="openShopImg(this)">Ver imagen</button>' +
+          '<button class="product-btn-cart" onclick="addToCart(this)">+ Agregar</button>' +
+        '</div>';
+      return card;
+    }
+
+    function loadShop() {
+      // Usamos gviz/tq con JSONP para evitar CORS
+      const callbackName = '__shopData_' + Date.now();
+      const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID +
+                  '/gviz/tq?tqx=out:json&callback=' + callbackName;
+
+      window[callbackName] = function(data) {
+        delete window[callbackName];
+        try {
+          const rows = data.table.rows;
+          const grid = document.getElementById('shopGrid');
+          grid.innerHTML = '';
+          let count = 0;
+          rows.forEach(function(r, i) {
+            const row = r.c.map(function(cell) { return cell ? String(cell.v || '') : ''; });
+            const card = buildShopCard(row, count);
+            if (card) { grid.appendChild(card); count++; }
+          });
+          document.getElementById('shopLoading').style.display = 'none';
+          if (count > 0) {
+            grid.style.display = 'grid';
+          } else {
+            document.getElementById('shopUnconfigured').style.display = 'flex';
+          }
+        } catch(e) {
+          document.getElementById('shopLoading').style.display = 'none';
+          document.getElementById('shopErrorMsg').textContent = 'Error al procesar datos: ' + e.message;
+          document.getElementById('shopError').style.display = 'flex';
+        }
+      };
+
+      const script = document.createElement('script');
+      script.src = url;
+      script.onerror = function() {
+        document.getElementById('shopLoading').style.display = 'none';
+        document.getElementById('shopErrorMsg').textContent = 'No se pudo conectar con el catálogo.';
+        document.getElementById('shopError').style.display = 'flex';
+      };
+      document.head.appendChild(script);
+    }
+
+    loadShop();
+
   </script>
+
+
+  <!-- ══ MODAL DETALLES ══ -->
+  <!-- ══ CARRITO FAB ══ -->
+  <button class="cart-fab" id="cartFab" onclick="openCart()" aria-label="Ver carrito">
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
+    <span class="cart-fab-badge" id="cartBadge">0</span>
+  </button>
+
+  <!-- Overlay drawer -->
+  <div class="cart-drawer-overlay" id="cartOverlay" onclick="closeCart()"></div>
+
+  <!-- Drawer -->
+  <div class="cart-drawer" id="cartDrawer">
+    <div class="cart-drawer-header">
+      <span class="cart-drawer-title">Mi selección</span>
+      <button class="cart-close-btn" onclick="closeCart()">&#10005;</button>
+    </div>
+    <div class="cart-items-list" id="cartItemsList">
+      <div class="cart-empty" id="cartEmpty">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4zM3 6h18M16 10a4 4 0 01-8 0"/></svg>
+        <span>Tu selección está vacía</span>
+      </div>
+    </div>
+    <div class="cart-footer">
+      <p class="cart-count-label">Productos seleccionados: <span id="cartCountLabel">0</span></p>
+      <button class="cart-whatsapp-btn" id="cartWhatsappBtn" onclick="sendWhatsApp()" disabled>
+        <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.999 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2 22l4.985-1.407A9.945 9.945 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
+        Pedir por WhatsApp
+      </button>
+      <button class="cart-clear-btn" id="cartClearBtn" onclick="clearCart()" style="display:none">Vaciar selección</button>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+    <div class="modal-box" id="modalBox">
+      <button class="modal-close" onclick="closeModal()" aria-label="Cerrar">&#10005;</button>
+      <!-- Imagen -->
+      <div class="modal-img-side">
+        <img id="modalImg" src="" alt="" />
+      </div>
+      <!-- Info -->
+      <div class="modal-info-side">
+        <div>
+          <p class="modal-brand-label" id="modalBrand"></p>
+          <h2 class="modal-perfume-name" id="modalName"></h2>
+        </div>
+        <div class="modal-divider"></div>
+        <span class="modal-familia" id="modalFamilia"></span>
+        <div class="modal-notes-grid">
+          <div class="modal-note-row">
+            <span class="modal-note-label">Notas de Salida</span>
+            <span class="modal-note-value" id="modalSalida"></span>
+          </div>
+          <div class="modal-note-row">
+            <span class="modal-note-label">Notas de Corazón</span>
+            <span class="modal-note-value" id="modalCorazon"></span>
+          </div>
+          <div class="modal-note-row">
+            <span class="modal-note-label">Notas de Fondo</span>
+            <span class="modal-note-value" id="modalFondo"></span>
+          </div>
+        </div>
+        <div class="modal-aroma-box">
+          <span class="modal-note-label">Aroma</span>
+          <p class="modal-note-value" id="modalAroma"></p>
+        </div>
+        <div class="modal-tags-row">
+          <span class="modal-tag" id="modalDuracion"></span>
+          <span class="modal-tag" id="modalOcasion"></span>
+        </div>
+      </div>
+    </div>
+  </div>
 
 </body>
 </html>
