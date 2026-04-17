@@ -3661,6 +3661,15 @@
         <div class="section-line"></div>
       </div>
 
+      <!-- Filtros por categoría (se generan dinámicamente) -->
+      <div class="brand-filter-bar" id="shopFilterBar" style="display:none">
+        <div class="brand-filter-inner">
+          <div class="filter-btns-wrap">
+            <div class="filter-btns" id="shopFilterBtns"></div>
+          </div>
+        </div>
+      </div>
+
       <!-- Estado: cargando -->
       <div class="shop-loading" id="shopLoading">
         <div class="shop-spinner"></div>
@@ -4108,10 +4117,11 @@
     }
 
     function buildShopCard(row, index) {
-      // Columnas: 0=# 1=Nombre 2=Precio 3=ID Foto
-      var name    = (row[1] || '').trim();
-      var precio  = (row[2] || '').trim();
-      var driveId = (row[3] || '').trim();
+      // Columnas: 0=# 1=Nombre 2=Categoría 3=Precio 4=ID Foto
+      var name     = (row[1] || '').trim();
+      var categoria= (row[2] || '').trim();
+      var precio   = (row[3] || '').trim();
+      var driveId  = (row[4] || '').trim();
       if (!name) return null;
 
       var imgSrc = driveId ? driveImgUrl(driveId) : '';
@@ -4119,6 +4129,7 @@
 
       var card = document.createElement('div');
       card.className = 'product-card';
+      card.dataset.categoria = categoria;
       card.innerHTML =
         '<div class="product-img-wrap" onclick="openShopImg(this)" style="cursor:pointer">' +
           '<span class="product-number">' + padNum + '</span>' +
@@ -4138,6 +4149,44 @@
       return card;
     }
 
+    function buildShopFilters(categorias) {
+      var bar  = document.getElementById('shopFilterBar');
+      var btns = document.getElementById('shopFilterBtns');
+      btns.innerHTML = '';
+
+      var all = document.createElement('button');
+      all.className = 'filter-btn active';
+      all.textContent = 'Todos';
+      all.onclick = function() { shopFilterBy('all', this); };
+      btns.appendChild(all);
+
+      categorias.sort().forEach(function(cat) {
+        if (!cat) return;
+        var btn = document.createElement('button');
+        btn.className = 'filter-btn';
+        btn.textContent = cat;
+        btn.onclick = function() { shopFilterBy(cat, this); };
+        btns.appendChild(btn);
+      });
+
+      bar.style.display = '';
+    }
+
+    function shopFilterBy(cat, btn) {
+      document.querySelectorAll('#shopFilterBtns .filter-btn').forEach(function(b) {
+        b.classList.remove('active');
+      });
+      btn.classList.add('active');
+
+      document.querySelectorAll('#shopGrid .product-card').forEach(function(card) {
+        if (cat === 'all' || card.dataset.categoria === cat) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
     function loadShop() {
       fetch(SHEET_CSV)
         .then(function(r) {
@@ -4149,13 +4198,19 @@
           var grid = document.getElementById('shopGrid');
           grid.innerHTML = '';
           var count = 0;
+          var catsSet = {};
           rows.forEach(function(row, i) {
             var card = buildShopCard(row, count);
-            if (card) { grid.appendChild(card); count++; }
+            if (card) {
+              grid.appendChild(card);
+              if (row[2]) catsSet[row[2].trim()] = true;
+              count++;
+            }
           });
           document.getElementById('shopLoading').style.display = 'none';
           if (count > 0) {
             grid.style.display = 'grid';
+            buildShopFilters(Object.keys(catsSet));
           } else {
             document.getElementById('shopUnconfigured').style.display = 'flex';
           }
