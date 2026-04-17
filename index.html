@@ -4085,24 +4085,39 @@
        A: Número  B: Marca  C: Nombre  D: ID foto Drive
        E: Familia  F: Salida  G: Corazón  H: Fondo  I: Aroma  J: Duración  K: Ocasión
     */
-    // ID del Google Sheet (visible en la URL de edición)
-    const SHEET_ID = '16wIlf6fVgEyzHKIbF82ydSCTjpbqQ9Y4AquxFYkpvy0';
+    // URL publicada del Google Sheet (Archivo → Publicar en la web → CSV)
+    const SHEET_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vROLsuakwSU0gISitjJwl3QVI4nbHOgvp62CH24MrMpc8ovJnsCAW_-CYHqYRJw5RPM3Tx89n6guFGw/pub?gid=0&single=true&output=csv';
 
     function driveImgUrl(id) {
       return 'https://lh3.googleusercontent.com/d/' + id.trim() + '=w600';
     }
 
+    function parseCSV(text) {
+      const lines = text.trim().split('\n');
+      return lines.slice(1).map(function(line) {
+        const cols = []; let cur = '', inQ = false;
+        for (var i = 0; i < line.length; i++) {
+          var ch = line[i];
+          if (ch === '"') { inQ = !inQ; }
+          else if (ch === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
+          else { cur += ch; }
+        }
+        cols.push(cur.trim());
+        return cols;
+      }).filter(function(r) { return r[1] && r[1].trim(); });
+    }
+
     function buildShopCard(row, index) {
       // Columnas: 0=# 1=Nombre 2=Precio 3=ID Foto
-      const name    = (row[1] || '').trim();
-      const precio  = (row[2] || '').trim();
-      const driveId = (row[3] || '').trim();
+      var name    = (row[1] || '').trim();
+      var precio  = (row[2] || '').trim();
+      var driveId = (row[3] || '').trim();
       if (!name) return null;
 
-      const imgSrc = driveId ? driveImgUrl(driveId) : '';
-      const padNum = String(index + 1).padStart(2, '0');
+      var imgSrc = driveId ? driveImgUrl(driveId) : '';
+      var padNum = String(index + 1).padStart(2, '0');
 
-      const card = document.createElement('div');
+      var card = document.createElement('div');
       card.className = 'product-card';
       card.innerHTML =
         '<div class="product-img-wrap" onclick="openShopImg(this)" style="cursor:pointer">' +
@@ -4124,21 +4139,18 @@
     }
 
     function loadShop() {
-      // Usamos gviz/tq con JSONP para evitar CORS
-      const callbackName = '__shopData_' + Date.now();
-      const url = 'https://docs.google.com/spreadsheets/d/' + SHEET_ID +
-                  '/gviz/tq?tqx=out:json&callback=' + callbackName;
-
-      window[callbackName] = function(data) {
-        delete window[callbackName];
-        try {
-          const rows = data.table.rows;
-          const grid = document.getElementById('shopGrid');
+      fetch(SHEET_CSV)
+        .then(function(r) {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.text();
+        })
+        .then(function(text) {
+          var rows = parseCSV(text);
+          var grid = document.getElementById('shopGrid');
           grid.innerHTML = '';
-          let count = 0;
-          rows.forEach(function(r, i) {
-            const row = r.c.map(function(cell) { return cell ? String(cell.v || '') : ''; });
-            const card = buildShopCard(row, count);
+          var count = 0;
+          rows.forEach(function(row, i) {
+            var card = buildShopCard(row, count);
             if (card) { grid.appendChild(card); count++; }
           });
           document.getElementById('shopLoading').style.display = 'none';
@@ -4147,21 +4159,12 @@
           } else {
             document.getElementById('shopUnconfigured').style.display = 'flex';
           }
-        } catch(e) {
+        })
+        .catch(function(err) {
           document.getElementById('shopLoading').style.display = 'none';
-          document.getElementById('shopErrorMsg').textContent = 'Error al procesar datos: ' + e.message;
+          document.getElementById('shopErrorMsg').textContent = 'Error: ' + err.message;
           document.getElementById('shopError').style.display = 'flex';
-        }
-      };
-
-      const script = document.createElement('script');
-      script.src = url;
-      script.onerror = function() {
-        document.getElementById('shopLoading').style.display = 'none';
-        document.getElementById('shopErrorMsg').textContent = 'No se pudo conectar con el catálogo.';
-        document.getElementById('shopError').style.display = 'flex';
-      };
-      document.head.appendChild(script);
+        });
     }
 
     loadShop();
