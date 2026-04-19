@@ -493,11 +493,12 @@
     }
 
     function buildShopCard(row, index) {
-      // Columnas: 0=# 1=Nombre 2=Categoría 3=Precio 4=ID Foto
-      var name     = (row[1] || '').trim();
-      var categoria= (row[2] || '').trim();
-      var precio   = (row[3] || '').trim();
-      var driveId  = (row[4] || '').trim();
+      // Columnas: 0=# 1=Nombre 2=Categoría 3=Precio 4=ID Foto 5=Subcategoría
+      var name         = (row[1] || '').trim();
+      var categoria    = (row[2] || '').trim();
+      var precio       = (row[3] || '').trim();
+      var driveId      = (row[4] || '').trim();
+      var subcategoria = (row[5] || '').trim();
       if (!name) return null;
 
       var imgSrc = driveId ? driveImgUrl(driveId) : '';
@@ -506,6 +507,7 @@
       var card = document.createElement('div');
       card.className = 'product-card';
       card.dataset.categoria = categoria;
+      card.dataset.subcategoria = subcategoria;
       var altTxt = name + (categoria ? ' — ' + categoria : '');
       card.innerHTML =
         '<div class="product-img-wrap" onclick="openShopImg(this)" style="cursor:pointer" role="button" tabindex="0" aria-label="Ver imagen de ' + name + '">' +
@@ -547,7 +549,35 @@
       });
 
       bar.style.display = '';
+      // Vincula flechas al scroll y actualiza estado inicial
+      btns.addEventListener('scroll', updateShopArrows);
+      updateShopArrows();
     }
+
+    // ── Scroll de filtros del Shop ──
+    function scrollShopFilters(dir) {
+      document.getElementById('shopFilterBtns').scrollLeft += dir * 200;
+    }
+    function scrollShopSubFilters(dir) {
+      document.getElementById('shopSubFilterBtns').scrollLeft += dir * 200;
+    }
+    function updateShopArrows() {
+      var el = document.getElementById('shopFilterBtns');
+      var l  = document.getElementById('shop-arrow-left');
+      var r  = document.getElementById('shop-arrow-right');
+      if (!el || !l || !r) return;
+      l.disabled = el.scrollLeft <= 0;
+      r.disabled = el.scrollLeft >= el.scrollWidth - el.clientWidth - 1;
+    }
+    function updateShopSubArrows() {
+      var el = document.getElementById('shopSubFilterBtns');
+      var l  = document.getElementById('shop-sub-arrow-left');
+      var r  = document.getElementById('shop-sub-arrow-right');
+      if (!el || !l || !r) return;
+      l.disabled = el.scrollLeft <= 0;
+      r.disabled = el.scrollLeft >= el.scrollWidth - el.clientWidth - 1;
+    }
+    window.addEventListener('resize', function() { updateShopArrows(); updateShopSubArrows(); });
 
     // Estado global del Shop
     var shopState = {
@@ -555,6 +585,7 @@
       renderedIdx: 0,    // índice hasta el cual se han creado cards
       batchSize: 40,     // tamaño del batch por "Ver más"
       activeCat: 'all',  // categoría activa
+      activeSub: 'all',  // subcategoría activa
       searchQ: ''        // búsqueda activa
     };
 
@@ -564,21 +595,71 @@
       });
       btn.classList.add('active');
       shopState.activeCat = cat;
+      shopState.activeSub = 'all';
+      buildSubFilters(cat);
       shopApplyFilters();
     }
 
-    // Aplica filtro de categoría + búsqueda sobre TODAS las cards (ya renderizadas)
+    // Construye los sub-filtros para la categoría seleccionada (si tiene subcategorías)
+    function buildSubFilters(cat) {
+      var bar  = document.getElementById('shopSubFilterBar');
+      var btns = document.getElementById('shopSubFilterBtns');
+      btns.innerHTML = '';
+
+      if (cat === 'all') { bar.style.display = 'none'; return; }
+
+      // Recolecta subcategorías únicas de esa categoría
+      var subsSet = {};
+      shopState.rows.forEach(function(row) {
+        if ((row[2] || '').trim() !== cat) return;
+        var s = (row[5] || '').trim();
+        if (s) subsSet[s] = true;
+      });
+      var subList = Object.keys(subsSet);
+      if (subList.length === 0) { bar.style.display = 'none'; return; }
+
+      var all = document.createElement('button');
+      all.className = 'filter-btn active';
+      all.textContent = 'Todos';
+      all.onclick = function() { shopSubFilterBy('all', this); };
+      btns.appendChild(all);
+
+      subList.sort().forEach(function(s) {
+        var b = document.createElement('button');
+        b.className = 'filter-btn';
+        b.textContent = s;
+        b.onclick = function() { shopSubFilterBy(s, this); };
+        btns.appendChild(b);
+      });
+
+      bar.style.display = '';
+      btns.addEventListener('scroll', updateShopSubArrows);
+      updateShopSubArrows();
+    }
+
+    function shopSubFilterBy(sub, btn) {
+      document.querySelectorAll('#shopSubFilterBtns .filter-btn').forEach(function(b) {
+        b.classList.remove('active');
+      });
+      btn.classList.add('active');
+      shopState.activeSub = sub;
+      shopApplyFilters();
+    }
+
+    // Aplica filtro de categoría + subcategoría + búsqueda sobre TODAS las cards
     function shopApplyFilters() {
       var q = (document.getElementById('shopSearchInput').value || '').toLowerCase().trim();
       shopState.searchQ = q;
       var cat = shopState.activeCat;
+      var sub = shopState.activeSub;
       var cards = document.querySelectorAll('#shopGrid .product-card');
       var visible = 0;
       cards.forEach(function(card) {
         var name = (card.querySelector('.product-name') || {}).textContent || '';
         var matchesQ = !q || name.toLowerCase().indexOf(q) !== -1;
         var matchesC = cat === 'all' || card.dataset.categoria === cat;
-        var show = matchesQ && matchesC;
+        var matchesS = sub === 'all' || card.dataset.subcategoria === sub;
+        var show = matchesQ && matchesC && matchesS;
         card.style.display = show ? '' : 'none';
         if (show) visible++;
       });
@@ -633,7 +714,9 @@
           shopState.rows = rows;
           shopState.renderedIdx = 0;
           shopState.activeCat = 'all';
+          shopState.activeSub = 'all';
           shopState.searchQ = '';
+          document.getElementById('shopSubFilterBar').style.display = 'none';
           var grid = document.getElementById('shopGrid');
           grid.innerHTML = '';
           var catsSet = {};

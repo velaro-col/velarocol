@@ -2607,33 +2607,43 @@
     <!-- Shop navbar -->
     <header class="shop-topbar">
       <div class="container shop-nav">
+        <a class="logo shop-logo" href="#" onclick="closeShop();return false;">
+          <img src="Logo.webp" alt="VÉLARO" />
+        </a>
         <button class="shop-back-btn" onclick="closeShop()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
           Volver
         </button>
-        <a class="logo shop-logo" href="#" onclick="closeShop();return false;">
-          <img src="Logo.webp" alt="VÉLARO" />
-        </a>
-        <div style="width:100px"></div>
       </div>
     </header>
 
     <!-- Shop content -->
     <div class="shop-page-content">
       <div class="shop-page-header">
-        <p class="section-subtitle">Disponibilidad inmediata</p>
-        <h2 class="section-title">S H O P</h2>
-        <div class="section-line"></div>
+        <h2 class="shop-page-title">Vélaro Shop</h2>
       </div>
 
       <!-- Filtros por categoría + búsqueda -->
       <div class="brand-filter-bar" id="shopFilterBar" style="display:none">
         <div class="brand-filter-inner">
           <div class="filter-btns-wrap">
+            <button class="scroll-arrow" id="shop-arrow-left" onclick="scrollShopFilters(-1)" aria-label="Anterior">&#8592;</button>
             <div class="filter-btns" id="shopFilterBtns"></div>
+            <button class="scroll-arrow" id="shop-arrow-right" onclick="scrollShopFilters(1)" aria-label="Siguiente">&#8594;</button>
           </div>
           <div class="search-wrap">
             <input type="text" id="shopSearchInput" onkeyup="shopApplyFilters()" placeholder="Buscar producto..." class="search-input" aria-label="Buscar en el shop" />
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-filtros (subcarpetas) — aparecen cuando se escoge una categoría con subcategorías -->
+      <div class="brand-filter-bar shop-subfilter-bar" id="shopSubFilterBar" style="display:none">
+        <div class="brand-filter-inner">
+          <div class="filter-btns-wrap">
+            <button class="scroll-arrow" id="shop-sub-arrow-left" onclick="scrollShopSubFilters(-1)" aria-label="Anterior">&#8592;</button>
+            <div class="filter-btns" id="shopSubFilterBtns"></div>
+            <button class="scroll-arrow" id="shop-sub-arrow-right" onclick="scrollShopSubFilters(1)" aria-label="Siguiente">&#8594;</button>
           </div>
         </div>
       </div>
