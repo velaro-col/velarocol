@@ -1,24 +1,3 @@
-    /* ══ SHOP PAGE NAVIGATION ══ */
-    var shopLoaded = false;
-
-    function openShop() {
-      document.getElementById('shopPage').classList.add('open');
-      document.body.style.overflow = 'hidden';
-      document.getElementById('shopPage').scrollTop = 0;
-      // Cargar productos solo la primera vez
-      if (!shopLoaded) { loadShop(); shopLoaded = true; }
-    }
-
-    function closeShop() {
-      document.getElementById('shopPage').classList.remove('open');
-      document.body.style.overflow = '';
-    }
-
-    // Cerrar con Escape ya está manejado arriba (se agregará aquí también)
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') closeShop();
-    });
-
     function filterBy(brand) {
       document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
 
@@ -56,23 +35,26 @@
       document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : '';
     }
 
-    // ── SCROLL FLECHAS MARCAS ──
+    // ── SCROLL FLECHAS MARCAS (solo perfumes) ──
     const filterBtns = document.getElementById('filterBtns');
     const arrowLeft  = document.getElementById('arrow-left');
     const arrowRight = document.getElementById('arrow-right');
 
     function scrollBrands(dir) {
-      filterBtns.scrollLeft += dir * 200;
+      if (filterBtns) filterBtns.scrollLeft += dir * 200;
     }
 
     function updateArrows() {
+      if (!filterBtns || !arrowLeft || !arrowRight) return;
       arrowLeft.disabled  = filterBtns.scrollLeft <= 0;
       arrowRight.disabled = filterBtns.scrollLeft >= filterBtns.scrollWidth - filterBtns.clientWidth - 1;
     }
 
-    filterBtns.addEventListener('scroll', updateArrows);
-    window.addEventListener('resize', updateArrows);
-    updateArrows();
+    if (filterBtns) {
+      filterBtns.addEventListener('scroll', updateArrows);
+      window.addEventListener('resize', updateArrows);
+      updateArrows();
+    }
 
     // ══ DATOS DE PERFUMES ══
     const perfumeData = {
@@ -796,5 +778,8 @@
         });
     }
 
-    // loadShop() se llama desde openShop() al hacer clic en Shop
+    // Auto-init: si estamos en shop.html (existe #shopGrid), cargar catálogo
+    if (document.getElementById('shopGrid')) {
+      loadShop();
+    }
 

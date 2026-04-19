@@ -17,7 +17,7 @@
       <nav class="menu">
         <a href="#inicio">Inicio</a>
         <a href="#perfumes">Perfumes</a>
-        <a href="#" onclick="openShop();return false;">Shop</a>
+        <a href="shop.html">Shop</a>
       </nav>
       <button class="hamburger" id="hamburger" aria-label="Menú" onclick="toggleMenu()">
         <span></span><span></span><span></span>
@@ -29,7 +29,7 @@
   <nav class="mobile-menu" id="mobileMenu">
     <a href="#inicio" onclick="toggleMenu()">Inicio</a>
     <a href="#perfumes" onclick="toggleMenu()">Perfumes</a>
-    <a href="#" onclick="openShop();toggleMenu();return false;">Shop</a>
+    <a href="shop.html" onclick="toggleMenu()">Shop</a>
   </nav>
 
   <!-- ══ MAIN PAGE ══ -->
@@ -2601,78 +2601,6 @@
     </section>
 
   </main>
-
-  <!-- ══ SHOP PAGE ══ -->
-  <div id="shopPage">
-    <!-- Shop navbar -->
-    <header class="shop-topbar">
-      <div class="container shop-nav">
-        <a class="logo shop-logo" href="#" onclick="closeShop();return false;">
-          <img src="Logo.webp" alt="VÉLARO" />
-        </a>
-        <button class="shop-back-btn" onclick="closeShop()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-          Volver
-        </button>
-      </div>
-    </header>
-
-    <!-- Shop content -->
-    <div class="shop-page-content">
-      <div class="shop-page-header">
-        <h2 class="shop-page-title">Vélaro Shop</h2>
-      </div>
-
-      <!-- Filtros por categoría + búsqueda -->
-      <div class="brand-filter-bar" id="shopFilterBar" style="display:none">
-        <div class="brand-filter-inner">
-          <div class="filter-btns-wrap">
-            <button class="scroll-arrow" id="shop-arrow-left" onclick="scrollShopFilters(-1)" aria-label="Anterior">&#8592;</button>
-            <div class="filter-btns" id="shopFilterBtns"></div>
-            <button class="scroll-arrow" id="shop-arrow-right" onclick="scrollShopFilters(1)" aria-label="Siguiente">&#8594;</button>
-          </div>
-          <div class="search-wrap">
-            <input type="text" id="shopSearchInput" onkeyup="shopApplyFilters()" placeholder="Buscar producto..." class="search-input" aria-label="Buscar en el shop" />
-          </div>
-        </div>
-      </div>
-
-      <!-- Sub-filtros (subcarpetas) — aparecen cuando se escoge una categoría con subcategorías -->
-      <div class="brand-filter-bar shop-subfilter-bar" id="shopSubFilterBar" style="display:none">
-        <div class="brand-filter-inner">
-          <div class="filter-btns-wrap">
-            <button class="scroll-arrow" id="shop-sub-arrow-left" onclick="scrollShopSubFilters(-1)" aria-label="Anterior">&#8592;</button>
-            <div class="filter-btns" id="shopSubFilterBtns"></div>
-            <button class="scroll-arrow" id="shop-sub-arrow-right" onclick="scrollShopSubFilters(1)" aria-label="Siguiente">&#8594;</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Estado: cargando -->
-      <div class="shop-loading" id="shopLoading">
-        <div class="shop-spinner"></div>
-        <p>Cargando productos...</p>
-      </div>
-
-      <!-- Estado: error -->
-      <div class="shop-error" id="shopError" style="display:none">
-        <p id="shopErrorMsg">No se pudo cargar el catálogo.</p>
-      </div>
-
-      <!-- Grid -->
-      <div class="container">
-        <div class="products-grid shop-grid" id="shopGrid" style="display:none"></div>
-        <div class="shop-empty" id="shopEmpty" style="display:none">
-          <p>No hay productos que coincidan con tu búsqueda.</p>
-        </div>
-        <div class="shop-load-more-wrap" id="shopLoadMoreWrap" style="display:none">
-          <button class="shop-load-more-btn" id="shopLoadMoreBtn" onclick="shopRenderMore()">
-            Ver más <span id="shopLoadMoreCount"></span>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div><!-- /#shopPage -->
 
   <!-- FOOTER -->
   <footer>
