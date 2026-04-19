@@ -415,6 +415,7 @@
       const msg = '¡Hola! Quiero comprar los siguientes productos de VÉLARO:\n\n'
                 + lines.join('\n')
                 + totalLine
+                + '\n\n🚚 *Entrega:* 3 a 5 días hábiles'
                 + '\n\n¿Me confirman disponibilidad?';
       const url = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(msg);
       window.open(url, '_blank');
