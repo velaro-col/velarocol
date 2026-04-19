@@ -652,6 +652,19 @@
       shopState.searchQ = q;
       var cat = shopState.activeCat;
       var sub = shopState.activeSub;
+
+      // Si hay filtro/búsqueda activos y aún quedan filas sin renderizar,
+      // renderiza TODAS para que el filtro pueda encontrar coincidencias.
+      var filterActive = cat !== 'all' || sub !== 'all' || q;
+      if (filterActive && shopState.renderedIdx < shopState.rows.length) {
+        var grid = document.getElementById('shopGrid');
+        for (var i = shopState.renderedIdx; i < shopState.rows.length; i++) {
+          var c = buildShopCard(shopState.rows[i], i);
+          if (c) grid.appendChild(c);
+        }
+        shopState.renderedIdx = shopState.rows.length;
+      }
+
       var cards = document.querySelectorAll('#shopGrid .product-card');
       var visible = 0;
       cards.forEach(function(card) {
