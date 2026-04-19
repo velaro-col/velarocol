@@ -14,17 +14,18 @@
       <a class="logo shop-logo" href="index.html">
         <img src="Logo.webp" alt="VÉLARO" />
       </a>
-      <a href="index.html" class="shop-back-btn">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-        Volver
-      </a>
+      <nav class="menu">
+        <a href="index.html#inicio">Inicio</a>
+        <a href="index.html#perfumes">Perfumería</a>
+        <a href="shop.html" class="active">Shop</a>
+      </nav>
     </div>
   </header>
 
   <!-- ══ SHOP CONTENT ══ -->
   <div class="shop-page-content">
     <div class="shop-page-header">
-      <h2 class="shop-page-title">Vélaro Shop</h2>
+      <img src="Velaro-shop.webp" alt="Vélaro Shop" class="shop-page-banner" />
     </div>
 
     <!-- Filtros por categoría + búsqueda -->
@@ -121,7 +122,6 @@
       <button class="modal-close" onclick="closeModal()" aria-label="Cerrar">&#10005;</button>
       <div class="modal-img-side">
         <img id="modalImg" src="" alt="" />
-        <div class="zoom-lens" id="zoomLens" aria-hidden="true"></div>
         <div class="shop-viewer-caption">
           <p class="shop-viewer-brand" id="shopViewerBrand"></p>
           <h3 class="shop-viewer-name" id="shopViewerName"></h3>

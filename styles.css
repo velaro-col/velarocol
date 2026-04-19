@@ -531,6 +531,15 @@
       opacity: 0.6;
       margin: 18px auto 0;
     }
+    .shop-page-banner {
+      display: block;
+      max-width: 560px;
+      width: 100%;
+      height: auto;
+      margin: 0 auto;
+    }
+    /* Link activo en el menú del shop */
+    .shop-topbar .menu a.active { color: var(--gold); }
 
     .shop-loading, .shop-unconfigured, .shop-error {
       display: flex;
@@ -683,6 +692,14 @@
 
     @media (max-width: 768px) {
       .menu { display: none; }
+      /* En shop.html el menú tiene solo 3 items, queda visible con texto más chico */
+      .shop-topbar .menu {
+        display: flex;
+        gap: 14px;
+        font-size: 0.58rem;
+        letter-spacing: 0.18rem;
+      }
+      .shop-logo img { width: 100px; }
       .hamburger { display: flex; }
       .container { width: min(1200px, calc(100% - 28px)); }
       .hero { padding: 32px 0; }
@@ -1172,19 +1189,7 @@
     }
     .modal-close:hover { background: rgba(212,175,55,0.18); }
 
-    /* ══ SHOP VIEWER (solo imagen + caption + lupa) ══ */
-    .zoom-lens {
-      display: none;
-      position: absolute;
-      width: 160px;
-      height: 160px;
-      border: 2px solid rgba(212,175,55,0.7);
-      border-radius: 50%;
-      pointer-events: none;
-      background-repeat: no-repeat;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(0,0,0,0.35);
-      z-index: 20;
-    }
+    /* ══ SHOP VIEWER (solo imagen + caption) ══ */
     .shop-viewer-caption { display: none; }
 
     .modal-box.shop-mode {
@@ -1237,6 +1242,5 @@
       .modal-perfume-name { font-size: 1.2rem; }
       .modal-box.shop-mode .modal-img-side { min-height: 320px; padding: 20px 20px 90px; }
       .modal-box.shop-mode .modal-img-side img { max-height: 320px; }
-      .zoom-lens { display: none !important; } /* desactivada en móvil */
     }
 
