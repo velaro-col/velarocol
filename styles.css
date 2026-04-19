@@ -533,10 +533,13 @@
     }
     .shop-page-banner {
       display: block;
-      max-width: 560px;
+      max-width: 340px;
       width: 100%;
       height: auto;
       margin: 0 auto;
+    }
+    @media (max-width: 640px) {
+      .shop-page-banner { max-width: 240px; }
     }
     /* Link activo en el menú del shop */
     .shop-topbar .menu a.active { color: var(--gold); }

@@ -475,7 +475,7 @@
     }
 
     // Monto a sumar al precio del catálogo antes de mostrarlo en Shop
-    var SHOP_PRICE_MARKUP = 60000;
+    var SHOP_PRICE_MARKUP = 75000;
 
     function buildShopCard(row, index) {
       // Columnas: 0=# 1=Nombre 2=Categoría 3=Precio 4=ID Foto 5=Subcategoría
