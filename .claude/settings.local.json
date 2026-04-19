@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:drive.google.com)",
+      "Bash(sed -n '8,1163p' index.html)",
+      "Bash(sed -n '3834,4492p' index.html)",
+      "Bash(cp index.html index.html.bak)",
+      "Bash(sed -i '3834,4492d; 8,1163d' index.html)"
+    ]
+  }
+}
