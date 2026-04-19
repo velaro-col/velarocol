@@ -131,16 +131,19 @@
     </div>
   </div>
 
-  <!-- ══ MODAL VISOR (solo modo shop: imagen ampliada + lupa) ══ -->
+  <!-- ══ MODAL VISOR (shop-mode: imagen + panel de info y características) ══ -->
   <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
     <div class="modal-box" id="modalBox">
       <button class="modal-close" onclick="closeModal()" aria-label="Cerrar">&#10005;</button>
       <div class="modal-img-side">
         <img id="modalImg" src="" alt="" />
-        <div class="shop-viewer-caption">
-          <p class="shop-viewer-brand" id="shopViewerBrand"></p>
-          <h3 class="shop-viewer-name" id="shopViewerName"></h3>
-        </div>
+      </div>
+      <div class="shop-info-panel">
+        <p class="shop-viewer-brand" id="shopViewerBrand"></p>
+        <h3 class="shop-viewer-name" id="shopViewerName"></h3>
+        <div class="modal-divider"></div>
+        <p class="shop-characteristics-label">Características</p>
+        <ul class="shop-characteristics" id="shopCharacteristics"></ul>
       </div>
     </div>
   </div>

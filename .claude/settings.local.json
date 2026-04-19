@@ -8,7 +8,8 @@
       "Bash(sed -i '3834,4492d; 8,1163d' index.html)",
       "Bash(node -e \"console.log\\(require\\('sharp'\\) ? 'sharp available' : 'no sharp'\\)\")",
       "Bash(python -c \"from PIL import Image; print\\('PIL available'\\)\")",
-      "Bash(python -c ' *)"
+      "Bash(python -c ' *)",
+      "WebFetch(domain:www.bunk3ronlinestore.com)"
     ]
   }
 }

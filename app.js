@@ -245,24 +245,40 @@
       document.body.style.overflow = '';
     }
 
-    // Modal simplificado para accesorios del Shop (solo imagen ampliada + caption)
+    // Modal para accesorios del Shop (imagen + precio + nombre + características)
     function openShopImg(btn) {
       const card   = btn.closest('.product-card');
       const img    = card.querySelector('img');
       const name   = card.querySelector('.product-name').textContent.trim();
       const precio = card.querySelector('.shop-precio') ? card.querySelector('.shop-precio').textContent.trim() : '';
+      const caracts = (card.dataset.caracteristicas || '').trim();
 
       if (!img) return;
       const modalImg = document.getElementById('modalImg');
       modalImg.src = img.src;
       modalImg.alt = name;
 
-      // Caption (solo visible en shop-mode)
       document.getElementById('shopViewerBrand').textContent = precio || 'VÉLARO SHOP';
       document.getElementById('shopViewerName').textContent  = name;
 
-      document.getElementById('modalBox').classList.add('shop-mode');
+      // Renderiza lista de características (separadas por ' | ' en la celda)
+      const ul = document.getElementById('shopCharacteristics');
+      const lbl = document.querySelector('.shop-characteristics-label');
+      ul.innerHTML = '';
+      if (caracts) {
+        caracts.split('|').forEach(function(c) {
+          const t = c.trim();
+          if (!t) return;
+          const li = document.createElement('li');
+          li.textContent = t;
+          ul.appendChild(li);
+        });
+      }
+      const hasItems = ul.children.length > 0;
+      ul.style.display = hasItems ? 'flex' : 'none';
+      if (lbl) lbl.style.display = hasItems ? 'block' : 'none';
 
+      document.getElementById('modalBox').classList.add('shop-mode');
       document.getElementById('modalOverlay').classList.add('open');
       document.body.style.overflow = 'hidden';
     }
@@ -479,12 +495,13 @@
     var SHOP_PRICE_MARKUP = 75000;
 
     function buildShopCard(row, index) {
-      // Columnas: 0=# 1=Nombre 2=Categoría 3=Precio 4=ID Foto 5=Subcategoría
+      // Columnas: 0=# 1=Nombre 2=Categoría 3=Precio 4=ID Foto 5=Subcategoría 6=Características
       var name         = (row[1] || '').trim();
       var categoria    = (row[2] || '').trim();
       var precio       = (row[3] || '').trim();
       var driveId      = (row[4] || '').trim();
       var subcategoria = (row[5] || '').trim();
+      var caracts      = (row[6] || '').trim();
       if (!name) return null;
 
       // Aplica markup al precio (si viene del Sheet como "$ 150.000" → "$ 210.000")
@@ -500,6 +517,7 @@
       card.className = 'product-card';
       card.dataset.categoria = categoria;
       card.dataset.subcategoria = subcategoria;
+      card.dataset.caracteristicas = caracts;
       var altTxt = name + (categoria ? ' — ' + categoria : '');
       card.innerHTML =
         '<div class="product-img-wrap" onclick="openShopImg(this)" style="cursor:pointer" role="button" tabindex="0" aria-label="Ver imagen de ' + name + '">' +
