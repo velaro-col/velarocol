@@ -519,6 +519,9 @@
       }).filter(function(r) { return r[1] && r[1].trim(); });
     }
 
+    // Monto a sumar al precio del catálogo antes de mostrarlo en Shop
+    var SHOP_PRICE_MARKUP = 60000;
+
     function buildShopCard(row, index) {
       // Columnas: 0=# 1=Nombre 2=Categoría 3=Precio 4=ID Foto 5=Subcategoría
       var name         = (row[1] || '').trim();
@@ -527,6 +530,12 @@
       var driveId      = (row[4] || '').trim();
       var subcategoria = (row[5] || '').trim();
       if (!name) return null;
+
+      // Aplica markup al precio (si viene del Sheet como "$ 150.000" → "$ 210.000")
+      if (precio) {
+        var baseNum = parsePrice(precio);
+        if (baseNum > 0) precio = fmtCOP(baseNum + SHOP_PRICE_MARKUP);
+      }
 
       var imgSrc = driveId ? driveImgUrl(driveId) : '';
       var padNum = String(index + 1).padStart(2, '0');
@@ -750,7 +759,10 @@
           return r.text();
         })
         .then(function(text) {
-          var rows = parseCSV(text).filter(function(r) { return r[1] && r[1].trim(); });
+          // Solo productos con nombre Y precio (los sin precio no se muestran)
+          var rows = parseCSV(text).filter(function(r) {
+            return r[1] && r[1].trim() && r[3] && r[3].trim();
+          });
           shopState.rows = rows;
           shopState.renderedIdx = 0;
           shopState.activeCat = 'all';
