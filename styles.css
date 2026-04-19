@@ -1172,6 +1172,62 @@
     }
     .modal-close:hover { background: rgba(212,175,55,0.18); }
 
+    /* ══ SHOP VIEWER (solo imagen + caption + lupa) ══ */
+    .zoom-lens {
+      display: none;
+      position: absolute;
+      width: 160px;
+      height: 160px;
+      border: 2px solid rgba(212,175,55,0.7);
+      border-radius: 50%;
+      pointer-events: none;
+      background-repeat: no-repeat;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(0,0,0,0.35);
+      z-index: 20;
+    }
+    .shop-viewer-caption { display: none; }
+
+    .modal-box.shop-mode {
+      grid-template-columns: 1fr;
+      max-width: 820px;
+    }
+    .modal-box.shop-mode .modal-info-side { display: none; }
+    .modal-box.shop-mode .modal-img-side {
+      min-height: 520px;
+      border-right: none;
+      padding: 40px 40px 110px;
+    }
+    .modal-box.shop-mode .modal-img-side img {
+      max-height: 560px;
+      cursor: zoom-in;
+      transition: none;
+    }
+    .modal-box.shop-mode .modal-img-side img:hover { transform: none; }
+    .modal-box.shop-mode .shop-viewer-caption {
+      display: block;
+      position: absolute;
+      bottom: 28px;
+      left: 24px;
+      right: 24px;
+      text-align: center;
+      z-index: 5;
+      pointer-events: none;
+    }
+    .shop-viewer-brand {
+      color: var(--gold);
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+    .shop-viewer-name {
+      color: rgba(255,255,255,0.95);
+      font-size: 1rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-weight: 300;
+      margin-top: 6px;
+    }
+
     /* Mobile modal */
     @media (max-width: 640px) {
       .modal-box { grid-template-columns: 1fr; max-height: 95vh; }
@@ -1179,5 +1235,8 @@
       .modal-img-side img { max-height: 220px; }
       .modal-info-side { padding: 24px 20px 20px; }
       .modal-perfume-name { font-size: 1.2rem; }
+      .modal-box.shop-mode .modal-img-side { min-height: 320px; padding: 20px 20px 90px; }
+      .modal-box.shop-mode .modal-img-side img { max-height: 320px; }
+      .zoom-lens { display: none !important; } /* desactivada en móvil */
     }
 

@@ -259,34 +259,79 @@
 
     function closeModal() {
       document.getElementById('modalOverlay').classList.remove('open');
+      document.getElementById('modalBox').classList.remove('shop-mode');
+      disableZoomLens();
       document.body.style.overflow = '';
     }
 
-    // Modal simplificado para accesorios del Shop (solo imagen + nombre + precio)
+    // Modal simplificado para accesorios del Shop (solo imagen ampliada + caption + lupa)
     function openShopImg(btn) {
-      const card  = btn.closest('.product-card');
-      const img   = card.querySelector('img');
-      const name  = card.querySelector('.product-name').textContent.trim();
+      const card   = btn.closest('.product-card');
+      const img    = card.querySelector('img');
+      const name   = card.querySelector('.product-name').textContent.trim();
       const precio = card.querySelector('.shop-precio') ? card.querySelector('.shop-precio').textContent.trim() : '';
 
       if (!img) return;
-      document.getElementById('modalImg').src  = img.src;
-      document.getElementById('modalImg').alt  = name;
-      document.getElementById('modalBrand').textContent = precio ? precio : 'VÉLARO SHOP';
-      document.getElementById('modalName').textContent  = name;
-      document.getElementById('modalFamilia').textContent  = '';
-      document.getElementById('modalSalida').textContent   = '';
-      document.getElementById('modalCorazon').textContent  = '';
-      document.getElementById('modalFondo').textContent    = '';
-      document.getElementById('modalAroma').textContent    = '';
-      document.getElementById('modalDuracion').textContent = '';
-      document.getElementById('modalOcasion').textContent  = '';
+      const modalImg = document.getElementById('modalImg');
+      modalImg.src = img.src;
+      modalImg.alt = name;
+
+      // Caption (solo visible en shop-mode)
+      document.getElementById('shopViewerBrand').textContent = precio || 'VÉLARO SHOP';
+      document.getElementById('shopViewerName').textContent  = name;
+
+      document.getElementById('modalBox').classList.add('shop-mode');
+      enableZoomLens(modalImg);
+
       document.getElementById('modalOverlay').classList.add('open');
       document.body.style.overflow = 'hidden';
     }
 
     function closeModalOutside(e) {
       if (e.target === document.getElementById('modalOverlay')) closeModal();
+    }
+
+    // ── Lupa sobre la imagen (solo en shop-mode) ──
+    var zoomState = { img: null, moveHandler: null, leaveHandler: null };
+
+    function enableZoomLens(img) {
+      var lens = document.getElementById('zoomLens');
+      var lensSize = 160;
+      var zoom = 2.5;
+
+      function onMove(e) {
+        var rect = img.getBoundingClientRect();
+        var x = e.clientX - rect.left;
+        var y = e.clientY - rect.top;
+        if (x < 0 || y < 0 || x > rect.width || y > rect.height) {
+          lens.style.display = 'none';
+          return;
+        }
+        lens.style.display = 'block';
+        var parentRect = img.parentElement.getBoundingClientRect();
+        lens.style.left = (e.clientX - parentRect.left - lensSize / 2) + 'px';
+        lens.style.top  = (e.clientY - parentRect.top  - lensSize / 2) + 'px';
+        lens.style.backgroundImage    = 'url("' + img.src + '")';
+        lens.style.backgroundSize     = (rect.width * zoom) + 'px ' + (rect.height * zoom) + 'px';
+        lens.style.backgroundPosition = (-(x * zoom - lensSize / 2)) + 'px ' + (-(y * zoom - lensSize / 2)) + 'px';
+      }
+      function onLeave() { lens.style.display = 'none'; }
+
+      // Si ya había un listener activo, límpialo primero
+      disableZoomLens();
+      zoomState = { img: img, moveHandler: onMove, leaveHandler: onLeave };
+      img.addEventListener('mousemove', onMove);
+      img.addEventListener('mouseleave', onLeave);
+    }
+
+    function disableZoomLens() {
+      if (zoomState.img && zoomState.moveHandler) {
+        zoomState.img.removeEventListener('mousemove', zoomState.moveHandler);
+        zoomState.img.removeEventListener('mouseleave', zoomState.leaveHandler);
+      }
+      var lens = document.getElementById('zoomLens');
+      if (lens) lens.style.display = 'none';
+      zoomState = { img: null, moveHandler: null, leaveHandler: null };
     }
 
     document.addEventListener('keydown', function(e) {
